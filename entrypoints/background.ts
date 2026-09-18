@@ -21,7 +21,7 @@ interface JudgeMessage {
 type Message =
   | JudgeMessage
   | { type: "get-state" }
-  | { type: "set-settings"; patch: Partial<Settings> };
+  | { type: "set-settings"; patch: Partial<Settings> & { baseUrl?: string } };
 
 export default defineBackground(() => {
   // Chrome keeps storage out of content scripts once this is set; Firefox ignores it and
@@ -31,6 +31,25 @@ export default defineBackground(() => {
     .catch(() => undefined);
 
   let inFlight: AbortController | null = null;
+
+  /**
+   * The endpoint is configurable, and the key rides on every request to it. An http:// or
+   * off-host value would hand the key to whoever answers, so a bad one falls back to the
+   * default rather than being stored. Localhost is allowed for the shim, and only reachable
+   * at all in a build made with JEV_ALLOW_LOCALHOST.
+   */
+  function validBaseUrl(value: unknown): string | null {
+    if (typeof value !== "string" || !value) return null;
+    let url: URL;
+    try {
+      url = new URL(value);
+    } catch {
+      return null;
+    }
+    const local = url.hostname === "127.0.0.1" || url.hostname === "localhost";
+    if (url.protocol !== "https:" && !(url.protocol === "http:" && local)) return null;
+    return url.origin;
+  }
 
   const settings = async (): Promise<Settings & { baseUrl: string }> => {
     const stored = await browser.storage.local.get([
@@ -44,7 +63,7 @@ export default defineBackground(() => {
       threshold:
         typeof stored.threshold === "number" ? stored.threshold : DEFAULT_SETTINGS.threshold,
       autoSkip: stored.autoSkip !== false,
-      baseUrl: typeof stored.baseUrl === "string" && stored.baseUrl ? stored.baseUrl : "https://api.typesafe.ai",
+      baseUrl: validBaseUrl(stored.baseUrl) ?? "https://api.typesafe.ai",
     };
   };
 
@@ -137,8 +156,24 @@ export default defineBackground(() => {
       return true;
     }
     if (message.type === "set-settings") {
+      // Only extension pages change settings. A content script asking to move the endpoint
+      // is a content script asking where to send the key.
+      if (sender.tab) return false;
       void (async () => {
-        await browser.storage.local.set(message.patch);
+        const patch: Partial<Settings> & { baseUrl?: string } = {};
+        if (typeof message.patch.apiKey === "string") patch.apiKey = message.patch.apiKey;
+        if (typeof message.patch.autoSkip === "boolean") patch.autoSkip = message.patch.autoSkip;
+        if (typeof message.patch.threshold === "number") {
+          patch.threshold = Math.min(0.99, Math.max(0.5, message.patch.threshold));
+        }
+        if ("baseUrl" in message.patch) {
+          // An empty field means "back to the default", anything unusable is ignored.
+          const raw = message.patch.baseUrl;
+          const url = validBaseUrl(raw);
+          if (url) patch.baseUrl = url;
+          else if (raw === "") patch.baseUrl = "";
+        }
+        await browser.storage.local.set(patch);
         const next = await settings();
         sendResponse(next);
         const stored = await browser.storage.session.get(TRACE_KEY);

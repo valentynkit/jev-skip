@@ -1,7 +1,7 @@
 # jev-skip
 
 Skips YouTube sponsors on videos nobody has labeled yet. Catches 77% of the sponsor seconds
-SponsorBlock's crowd marked across 23 videos, at 27s of false skips per hour, for $0.0008 a
+SponsorBlock's crowd marked across 23 videos, at 34s of false skips per hour, for $0.0008 a
 video, with the bar painted 0.9s after the request goes out.
 
     npm install && npm run build   # then load dist/chrome-mv3 unpacked, paste your key

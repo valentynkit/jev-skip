@@ -25,7 +25,7 @@ has been submitted.
 
     You bring your own API key. There is no server in the middle and no account.
 
-    Measured on 23 videos with crowd labels: 77% of the labeled sponsor seconds caught, 27
+    Measured on 23 videos with crowd labels: 77% of the labeled sponsor seconds caught, 34
     seconds an hour of false skips as an upper bound, $0.0008 a video. The numbers and the
     script that produces them are in the repository.
 

@@ -20,6 +20,8 @@ export default defineContentScript({
       bar = null;
       scheduler?.destroy();
       scheduler = null;
+      // Undo across a navigation would seek this video to the other video's timestamp.
+      lastSkip = null;
       document.querySelector(".jev-skip-toast")?.remove();
     }
 
@@ -61,6 +63,7 @@ export default defineContentScript({
         threshold: 0.85,
         autoSkip: true,
         leadMs: firefox ? LEAD_MS.firefox : LEAD_MS.chrome,
+        adPlaying: () => !!document.querySelector(".ad-showing, .ad-interrupting"),
         onSkip: toast,
       });
     }
@@ -116,6 +119,9 @@ export default defineContentScript({
     browser.runtime.onMessage.addListener(
       (message: { type: string; trace: Trace; settings: { threshold: number; autoSkip: boolean } }) => {
         if (message.type !== "trace") return;
+        // The worker broadcasts, so every YouTube tab hears every trace. Another tab's
+        // timestamps would arm a skip against this video.
+        if (message.trace.videoId && message.trace.videoId !== currentId) return;
         const video = document.querySelector("video");
         if (video && !bar) attach(video);
         scheduler?.setOptions(message.settings);
@@ -130,6 +136,10 @@ export default defineContentScript({
     // Undo is also a keyboard action while the toast is up.
     document.addEventListener("keydown", (event) => {
       if (event.key !== "z" || !lastSkip || Date.now() - lastSkip.at > 4000) return;
+      // Cmd-Z in the comment box is not a request to rewind the video.
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+      const focused = document.activeElement as HTMLElement | null;
+      if (focused?.isContentEditable || /^(input|textarea|select)$/i.test(focused?.tagName ?? "")) return;
       const video = document.querySelector("video");
       if (video) video.currentTime = lastSkip.slice.start;
       document.querySelector(".jev-skip-toast")?.remove();

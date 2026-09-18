@@ -93,3 +93,24 @@ describe("seek bar", () => {
     bar.destroy();
   });
 });
+
+describe("seek bar, after the review", () => {
+  it("hides a tooltip whose slice is about to be rebuilt", () => {
+    const bar = mountBar(progress);
+    bar.update([slice({ start: 30, end: 60 })], 120);
+    const tip = progress.querySelector(".jev-skip-tip") as HTMLElement;
+    progress.querySelector("li")!.dispatchEvent(new MouseEvent("mouseenter"));
+    expect(tip.style.display).toBe("block");
+    // Answers arrive in batches, so update() runs many times per video.
+    bar.update([slice({ start: 30, end: 60 }), slice({ id: "s002", start: 90, end: 120 })], 120);
+    expect(tip.style.display).toBe("none");
+    bar.destroy();
+  });
+
+  it("paints nothing on a live stream, where duration is Infinity", () => {
+    const bar = mountBar(progress);
+    bar.update([slice({})], Infinity);
+    expect(progress.querySelectorAll("li")).toHaveLength(0);
+    bar.destroy();
+  });
+});

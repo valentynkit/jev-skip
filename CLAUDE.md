@@ -19,12 +19,12 @@ fixtures, prints:
 
 ```
 77.0% of crowd-labeled sponsor seconds caught (n=23 videos / 1,820 labeled seconds, recorded fixtures, typesafe-ai/jev)
-27.2s false-skip per hour, upper bound (n=22 dense-subset videos)
+34.0s false-skip per hour, upper bound (n=22 dense-subset videos)
 $0.0008 per video (n=23, mean 18.1k input tokens)
 0.9s p50 to first painted segment (n=23, single request)
 ```
 
-Brier 0.117, IoU 0.666, sweep in `measure.json`. The `has_promo_markers` arm was answered
+Brier 0.105, IoU 0.666, sweep in `measure.json`. The `has_promo_markers` arm was answered
 with data on the 12 videos both arms cover: 79.0% recall with the belt versus 73.4%
 without, at the same false-skip rate. Main arm recorded 27 of 27 chunks; the `--no-markers`
 arm 12 of 27 (gateway rate limit), resumable at zero cost for what exists. All of it came

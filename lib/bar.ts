@@ -48,8 +48,11 @@ export function mountBar(progressBar: HTMLElement): BarHandle {
   return {
     element: list,
     update(slices, duration) {
+      // The hovered li is about to be removed, and nothing would ever hide its tooltip.
+      tip.style.display = "none";
       for (const node of Array.from(list.querySelectorAll("li"))) node.remove();
-      if (!(duration > 0)) return;
+      // A live stream reports Infinity, which is > 0 and would put every slice at zero width.
+      if (!(duration > 0) || !Number.isFinite(duration)) return;
       for (const slice of slices) {
         if (!paintable(slice)) continue;
         const li = doc.createElement("li");
