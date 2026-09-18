@@ -1,0 +1,28 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: npm run build:firefox
+      - name: content bundle carries no key
+        run: |
+          if grep -rE "apiKey|Bearer" dist/chrome-mv3/content-scripts dist/firefox-mv2/content-scripts; then
+            echo "the key or an Authorization header reached the content bundle"
+            exit 1
+          fi
+      - name: measure offline against the fixtures
+        run: npm run measure
