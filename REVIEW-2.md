@@ -20,7 +20,7 @@
 
 **1. BLOCKER — false-skip guard's data source is unspecified.** Section 5 gates on "videos
 with three or more independent submissions." The only ground-truth fetch specified is the
-live `skipSegments` API, whose schema per `research/03:41` (cited elsewhere in this doc as
+live `skipSegments` API, whose schema per `docs/research/03:41` (cited elsewhere in this doc as
 verified) is `{segment, category, UUID}` — no vote/submission count. The real API does return
 a `votes` field, but it's a net score, not a submission count, and the doc never says to
 capture it, store it in `crowd/<id>.json`, or how it maps to "independent submissions" (per

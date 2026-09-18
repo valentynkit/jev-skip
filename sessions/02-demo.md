@@ -4,8 +4,8 @@ Run after `sessions/01-review.md`, from inside `jev-skip/`.
 
 ## Context to load first
 
-`../CLAUDE.md`, `CLAUDE.md`, `CONTEXT.md` sections 1, 7, 8, `../SHARED.md` "The recipe"
-and "Launch", `../research/00a-virality-recipe.md`, `../research/04` section 2 (QuickTime,
+`CLAUDE.md` ("Lab rules"), `CLAUDE.md`, `CONTEXT.md` sections 1, 7, 8, `docs/SHARED.md` "The recipe"
+and "Launch", `docs/research/00a-virality-recipe.md`, `docs/research/04` section 2 (QuickTime,
 the ffmpeg palette command, X specs), `demo/README.md`, `entrypoints/popup/`,
 `lib/bar.ts`, `youtube.content.ts` (tooltip and toast).
 

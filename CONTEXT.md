@@ -1,6 +1,6 @@
 # jev-skip
 
-Read `../SHARED.md` first. Cites `research/00c` A, `01`, `02`.5, `03`.3, `04`.
+Read `docs/SHARED.md` first. Cites `docs/research/00c` A, `01`, `02`.5, `03`.3, `04`.
 
 ## 1. Pitch
 
@@ -19,7 +19,7 @@ skip firing at the sponsor read.
 
 Differentiator. SponsorBlock (13.3k stars) is a vote database: coverage on a fresh upload is
 "however long until someone submits," often never, and its bar is fixed-color segments with
-no notion of doubt (`research/03` section 3). unclutter and typesafe-adblock judge DOM nodes,
+no notion of doubt (`docs/research/03` section 3). unclutter and typesafe-adblock judge DOM nodes,
 not a time axis. Nobody publishes a continuous probability over video time with no crowd
 dependency, and nobody publishes time-to-first-coverage, because for a crowd tool the honest
 answer is embarrassing.
@@ -68,7 +68,7 @@ Caption acquisition has to happen in the tab. The `timedtext` URL in
 `ytInitialPlayerResponse.captions.playerCaptionsTracklistRenderer.captionTracks[].baseUrl`
 is session-signed (`ei`, `expire`, `signature`) and returns an empty 200 from any other
 context, background worker included. That is inference from the two blog write-ups in
-`research/00c` section A, not YouTube documentation, and the gating is tightening: PoToken
+`docs/research/00c` section A, not YouTube documentation, and the gating is tightening: PoToken
 enforcement can produce the same empty 200 for a same-tab fetch on a captioned video. We
 cannot tell those apart and treat both as nothing to read, so the README has to say the
 check can false-negative. Content script reads the player response, picks the track (manual
@@ -82,7 +82,7 @@ one thing, "what kind of segment is this."
 Two regex belts in front of it. Sentence-boundary snapping: build 30-second windows, move
 each boundary to the nearest `[.!?]\s` or cue gap over 1.2s within ±8 seconds, fall back to
 the raw boundary, cap at 45s. A window cut mid-sentence is the likeliest cause of a bad
-label (`research/02` section 5). Then a pre-pass marking windows carrying a URL, a
+label (`docs/research/02` section 5). Then a pre-pass marking windows carrying a URL, a
 coupon-code shape (`[A-Z0-9]{4,12}` next to "code" or "promo") or "use my link", which goes
 into state as a boolean so Jev sees the evidence code found. Not a decision.
 
@@ -104,8 +104,8 @@ Chrome, 600ms on Firefox (`src/content.ts:830-834`). One timer alive at a time.
 
 One request per video, chunked over 60 minutes. State carries the transcript once, questions
 carry the judgment, one per segment, referencing it by id: fan-out economics from
-`research/02` section 3. Neighbor context comes free that way, so the `prev_segment_tail` /
-`next_segment_head` fields sketched in `research/02` section 5 are dropped as redundant.
+`docs/research/02` section 3. Neighbor context comes free that way, so the `prev_segment_tail` /
+`next_segment_head` fields sketched in `docs/research/02` section 5 are dropped as redundant.
 
 ```json
 {
@@ -145,10 +145,10 @@ carry the judgment, one per segment, referencing it by id: fan-out economics fro
 ```
 
 Structured `{what, not_for, examples}` only on the pair that is genuinely confusable
-(`research/02` section 1). Everything else stays a plain description, because criteria repeat
+(`docs/research/02` section 1). Everything else stays a plain description, because criteria repeat
 per question and are the real cost driver. Napkin math at one stated length: a 20-minute
 video is 40 segments at 30 seconds, carrying 3 to 4.5k transcript tokens (speech runs
-150-220 tokens/minute, `research/00c` section A) plus 40 copies of a roughly 200-token
+150-220 tokens/minute, `docs/research/00c` section A) plus 40 copies of a roughly 200-token
 criteria block. Call it 12k input tokens, a fraction of a cent at $0.042/M. That sizes the
 budget, it is not a claim: `measure` prints the real figure and only that ships. Keeping
 `other` matters: a novel segment mislabeled `content` is not skipped, the safe direction.
@@ -158,7 +158,7 @@ Thresholds. Dead band 0.30 to 0.70 is "uncertain," never skipped. Act threshold 
 any request that errors all resolve to content, meaning no skip. Jev can only make this
 extension skip *less* than a keyword matcher would.
 
-Jaggedness risks (`research/01` section 6):
+Jaggedness risks (`docs/research/01` section 6):
 
 1. **Padded state.** Accuracy falls with unrelated state, and most of a 60-minute transcript
    is unrelated to any one segment. Mitigation: chunk at 90 segments or 20k estimated state
@@ -172,7 +172,7 @@ Jaggedness risks (`research/01` section 6):
    "sponsor" we called "self_promo" is a taxonomy disagreement, not a bad skip.
 4. **Wrong `has_promo_markers`.** The risk the design adds rather than inherits: a giveaway
    or an on-screen credit trips the regex and state carries evidence contradicting the text,
-   the contradictory-criteria axis in `research/01` section 6. Mitigation: the field is named
+   the contradictory-criteria axis in `docs/research/01` section 6. Mitigation: the field is named
    as markers code found, never a verdict, and the section 5 fixture asserts a false positive
    does not flip the label. If it fails, the field goes.
 
@@ -183,7 +183,7 @@ exists.
 
 `fixtures/` holds the committed corpus so everything runs offline: `videos.json` (30 ids,
 title, channel, duration), `transcripts/<id>.json`, `crowd/<id>.json`, `jev/<sha256>.json`
-(answers keyed by `sha256(state + questions)`, `research/01` section 4).
+(answers keyed by `sha256(state + questions)`, `docs/research/01` section 4).
 
 **Ground truth comes from `searchSegments`, not `skipSegments`.** The k-anonymity endpoint
 the extension itself uses returns only `{segment, category, UUID, locked}`
@@ -205,7 +205,7 @@ recency, is what keeps it from being a cherry-pick. The prefix walk is only a se
 re-reads `locked` and `userID` from `searchSegments`, the fields the guard uses, and drops any
 candidate whose `locked = 1` row no longer stands, pulling the next id in order. Selection and
 guard never read different sources. The three layers land as
-`scripts/fake-jev.ts` (`research/01` section 3), the recording proxy, and `measure`.
+`scripts/fake-jev.ts` (`docs/research/01` section 3), the recording proxy, and `measure`.
 
 **Where the captions come from.** Builder's change: the `timedtext` URL is session-signed, so
 a script outside the watch tab gets an empty 200 (section 3). `record --corpus` shells out to
@@ -253,7 +253,7 @@ _._s p50 to first painted segment (n=30, single request)
 ```
 
 plus `measure.json` with per-video rows, the sweep, the IoU detail line and the reliability
-bins. Calibration is the Brier plus `threshold_sweep` from `research/01` section 5 ported to
+bins. Calibration is the Brier plus `threshold_sweep` from `docs/research/01` section 5 ported to
 TS; `jevcal --lock` guards it in CI once a threshold is published. `measure` exits 1 if
 recall drops below the locked floor or false-skip rises above its ceiling. Until
 `thresholds.json` exists nothing has been earned, so it prints, writes, notes "unlocked, no
@@ -302,7 +302,7 @@ Layout: `entrypoints/{background.ts,youtube.content.ts,popup/}`,
 7. **Scheduler.** Armed timer, re-arm on the five events, threshold gate, undo toast.
    Check: `npm test -- schedule` with a fake video element asserts one pending timer, re-arm
    on `seeked`, none below threshold, `currentTime` landing at segment end.
-8. **Fake, recorder, corpus.** `scripts/fake-jev.ts` (fixture-driven, research/01 section
+8. **Fake, recorder, corpus.** `scripts/fake-jev.ts` (fixture-driven, docs/research/01 section
    3), `scripts/record.ts` (the recording proxy keyed by `sha256(state + questions)`, plus the
    corpus curation step: apply the section 5 selection rule against the SponsorBlock CSV dump,
    fetch `searchSegments` per video, write `fixtures/videos/<id>/{captions.json3,crowd.json}`).
@@ -358,7 +358,7 @@ TypeSafe, under your own key. Nothing else. No server of ours exists.
 ## 8. Launch
 
 Order per `SHARED.md`: fourth of five, because the Chrome review clock runs for weeks
-(`research/04` section 4). Day one: submit to the Chrome Web Store, self-distribute the
+(`docs/research/04` section 4). Day one: submit to the Chrome Web Store, self-distribute the
 signed Firefox xpi from a GitHub release, README carries both plus unpacked instructions.
 Then TypeSafe Discord, r/youtube and r/SponsorBlock ("different approach, not a
 replacement," after reading their rules), Show HN 7-10am PT weekday, X with the MP4, the
@@ -370,7 +370,7 @@ reads the captions and decides at watch time: [N]% of the crowd's sponsor second
 section 4's estimate.
 
 Assets: a video from the last few days with a known sponsor read and no crowd coverage,
-QuickTime a cropped window (not the 5120x1440 desktop), then `research/04` section 2's
+QuickTime a cropped window (not the 5120x1440 desktop), then `docs/research/04` section 2's
 two-pass palette command at 800px/15fps, under 5MB; the .mov as H.264 MP4 for X; a still of
 a confident slice beside a faint one.
 
