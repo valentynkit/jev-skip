@@ -4,11 +4,11 @@ Run from inside `jev-skip/` in a fresh Claude Code session.
 
 ## Context to load first
 
-1. `../CLAUDE.md` (monorepo rules, real Jev access), then `CLAUDE.md` here ("Build state").
-2. `CONTEXT.md` in full including the review responses; `REVIEW-3.md`; `../SHARED.md`.
-3. `../research/04-quality-bar-and-launch.md` sections 1, 2, 4; `../research/01` section 6;
-   `../research/00c-feasibility.md` section A; `../research/03` section 3.
-4. Prior art at `/tmp/prior-art/` (re-clone per `../CLAUDE.md` if gone): ajayyy_SponsorBlock
+1. `CLAUDE.md` ("Lab rules") (monorepo rules, real Jev access), then `CLAUDE.md` here ("Build state").
+2. `CONTEXT.md` in full including the review responses; `REVIEW-3.md`; `docs/SHARED.md`.
+3. `docs/research/04-quality-bar-and-launch.md` sections 1, 2, 4; `docs/research/01` section 6;
+   `docs/research/00c-feasibility.md` section A; `docs/research/03` section 3.
+4. Prior art at `/tmp/prior-art/` (re-clone per `CLAUDE.md` if gone): ajayyy_SponsorBlock
    (`src/js-components/previewBar.ts`, `src/content.ts`, `src/utils/segmentData.ts`),
    kitze_unclutter (`entrypoints/background.ts`, the key split), leepokai_jev-guard.
 
@@ -42,7 +42,7 @@ Parallel subagents, at most 5 in flight, drafting on opus, reviewers on sonnet, 
 4. **Finish the measurement.** Record the remaining no-markers chunks when credits exist;
    publish both arms. Re-measure on the direct API when a TypeSafe key exists, then pin
    `jev-1.13.0` and lock `thresholds.json` as a published threshold.
-5. **The README, state of the art.** `research/04` section 1 order: the measured line
+5. **The README, state of the art.** `docs/research/04` section 1 order: the measured line
    first with its footnote, the install command and the unpacked load steps, the GIF above
    the fold, Why (crowd databases are always late; the no-captions limit folded in),
    Privacy and permissions as a table (what leaves the browser, to whom, under whose key),

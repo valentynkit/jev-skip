@@ -20,7 +20,7 @@ demote it to `measure.json` detail.
 The hook line commits to "a twentieth of a cent" (~$0.0005/video). Section 4's own napkin
 math — a 20-minute video at ~4k transcript tokens plus sixty 200-token criteria copies
 (~12k) — is ~16k tokens, which at $0.042/M is ~$0.00067, about 30% over the claimed
-fraction. The "sixty" segment count is also lifted from research/02's 30-minute-video
+fraction. The "sixty" segment count is also lifted from docs/research/02's 30-minute-video
 example, not paired correctly with the 20-minute transcript-token figure it sits next to.
 Fix: use matched numbers (a 20-min video is ~40 segments at 30s each, not 60) and don't
 commit to a specific fraction in the hook line before `measure` produces the real one —
@@ -28,9 +28,9 @@ that's the whole point of SHARED's "number is measured, not guessed" rule applie
 too.
 
 **3. CONCERN — Section 5, missing test for the doc's own new risk surface.**
-research/01 §6 lists "contradictory instructions vs. criteria" as a jaggedness axis. The
+docs/research/01 §6 lists "contradictory instructions vs. criteria" as a jaggedness axis. The
 doc adds `has_promo_markers`, a regex-computed boolean fed into state as evidence — a field
-that doesn't exist in research/02's original design, and Open Question 2 already flags it
+that doesn't exist in docs/research/02's original design, and Open Question 2 already flags it
 as possibly muddying the headline. No fixture tests the case where that signal is wrong: a
 coupon-shaped string in a giveaway announcement or a URL in an on-screen credit, not an
 actual sponsor read. This is the one jaggedness risk the design itself introduces, and it's
@@ -48,7 +48,7 @@ right call — but the README's "Known limits" should say the check can false-ne
 video that does have captions, not only "no captions on this video."
 
 **5. NIT — Section 3, citation is two lines off.** `entrypoints/background.ts:58-59`
-(inherited from research/03) points at the comment describing the `storage.setAccessLevel`
+(inherited from docs/research/03) points at the comment describing the `storage.setAccessLevel`
 call; the call itself is lines 60-62 in the clone. Cosmetic, but worth fixing when this
 becomes a real code comment so the next reader isn't sent to prose instead of code.
 
