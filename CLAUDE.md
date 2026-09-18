@@ -6,13 +6,21 @@ the "Lab rules" section below for the monorepo rules, then `CONTEXT.md` here in 
 
 Verdict after three review rounds: **ready to build**.
 
-## Build state (2026-09-18, first build session)
+## Build state (2026-09-19, after the review session)
 
-Tasks 1 to 10 coded. `npm test` 36 tests in 7 files, all passing, offline. Both builds
-emit (`dist/chrome-mv3/`, `dist/firefox-mv2/`) and both zips exist. The content bundle
-contains no `apiKey` or `Bearer`. Loading unpacked in a browser has NOT been done; nothing
-has been watched on a real YouTube page yet. No second-pair review; that is
-`sessions/01-review.md`.
+Tasks 1 to 10 coded, reviewed, and fixed. `npm test` 42 tests in 7 files, all passing,
+offline. Both builds emit and the content bundles contain no `apiKey` or `Bearer`.
+
+The extension has now been loaded into a real browser (Playwright's Chromium: no Chrome and
+no Firefox exist on this machine). It mounts and paints on a live watch page. It has still
+never completed its own pipeline end to end, because YouTube shows an automated profile
+"Sign in to confirm you're not a bot", which returns empty caption bodies and blocks
+playback. Read `docs/browser-ground-truth.md` before trusting anything about runtime
+behaviour, and `docs/review-01.md` for what the five reviewers found, what was fixed, what
+was rejected, and what is deferred.
+
+Two published numbers moved in that session: false-skip 27.2 to 34.0 s/h (it was only
+counting two of the five categories the extension actually skips) and Brier 0.117 to 0.105.
 
 This is the one project with real numbers. `npm run measure`, offline over recorded
 fixtures, prints:
@@ -45,8 +53,15 @@ Three `ponytail:` markers: the watch page is re-fetched and scraped for the play
 (`entrypoints/youtube.content.ts:69`); one skip threshold for all five categories
 (`lib/schedule.ts:39`); the fake's keyword heuristic (`scripts/fake-jev.ts:5`).
 
-Blocked on: the remaining 15 no-markers chunks (gateway credits), a manual load in Chrome
-and Firefox, and a direct-API re-measure when a TypeSafe key exists.
+Blocked on a key, and only on a key. The gateway shim now answers "Free tier requests on
+this model are rate-limited"; Vercel's minimum top-up is $20 and was declined, so there are
+no live answers until a TypeSafe key exists. That blocks the remaining 15 no-markers
+chunks, the direct-API re-measure, the segmentation fixes in `docs/review-01.md` (changing
+segmentation rehashes every request and orphans all 27 recorded answer files), and any demo
+clip that shows a live call rather than a replay.
+
+Also blocked on a logged-in browser session: whether the caption fetch works for real users
+is still unknown, and it is the one fact that decides whether v0.1 works at all.
 
 ## Next sessions
 
