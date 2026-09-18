@@ -1,0 +1,9 @@
+{
+ "model": "typesafe-ai/jev, answered through the Vercel AI Gateway shim",
+ "act": 0.85,
+ "paint_floor": 0.2,
+ "recall_floor": 0.7,
+ "false_skip_ceiling_per_hour": 40,
+ "measured": "2026-09-18, n=23 videos, 1820 crowd-labeled sponsor seconds: 77.0% recall, 27.2s/h false skip",
+ "note": "A regression guard, not a published threshold. Re-measure on the direct API before pinning anything to jev-1.13.0."
+}

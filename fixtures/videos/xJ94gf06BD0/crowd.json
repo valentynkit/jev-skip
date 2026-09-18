@@ -1,0 +1,66 @@
+{
+ "segmentCount": 4,
+ "page": 0,
+ "segments": [
+  {
+   "UUID": "50f62b73d6a5b8de13b6e6703331ad5345abef79b366db81498c77b0c15a90fe4",
+   "timeSubmitted": 1639322195238,
+   "startTime": 0.271,
+   "endTime": 64.379,
+   "category": "sponsor",
+   "actionType": "skip",
+   "votes": 0,
+   "views": 264,
+   "locked": 0,
+   "hidden": 0,
+   "shadowHidden": 0,
+   "userID": "468e7cc9b527c319aa19f1dca39abd90898416c22a3127be1eac8f894bc95a03",
+   "description": ""
+  },
+  {
+   "UUID": "5b62abc74524cf5156faa804969f7745e26e6575082cd80f7666ab3bcc067bdb9",
+   "timeSubmitted": 1639322272264,
+   "startTime": 0,
+   "endTime": 67.354,
+   "category": "sponsor",
+   "actionType": "skip",
+   "votes": 11,
+   "views": 9209,
+   "locked": 1,
+   "hidden": 0,
+   "shadowHidden": 0,
+   "userID": "e06432f2680a16eec63eab4a1c05658366b2c0c10814515eca17ab91eb6bd0a5",
+   "description": ""
+  },
+  {
+   "UUID": "550d9660f707e269344a984f037a001a6b3b4182317cbcb9258bb320269d7d4e6",
+   "timeSubmitted": 1639323853688,
+   "startTime": 0,
+   "endTime": 67.842,
+   "category": "sponsor",
+   "actionType": "skip",
+   "votes": 0,
+   "views": 149,
+   "locked": 0,
+   "hidden": 0,
+   "shadowHidden": 0,
+   "userID": "25f04028d378dd4814268f51a2bef3ab27df595fe0cd37ff9b71430086fc6df5",
+   "description": ""
+  },
+  {
+   "UUID": "3d033c8015a5cb55e15c7474db7f05fe20819b399bde24140476375b7483a86e6",
+   "timeSubmitted": 1646551773543,
+   "startTime": 0,
+   "endTime": 67.37,
+   "category": "sponsor",
+   "actionType": "skip",
+   "votes": 0,
+   "views": 1,
+   "locked": 0,
+   "hidden": 0,
+   "shadowHidden": 0,
+   "userID": "245c31148b4df56b7f350bc56fb252c6d77c1f4565e2c758a6abebf0125b4b6c",
+   "description": ""
+  }
+ ]
+}

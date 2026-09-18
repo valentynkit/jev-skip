@@ -1,0 +1,51 @@
+{
+ "segmentCount": 3,
+ "page": 0,
+ "segments": [
+  {
+   "UUID": "329f9eb053c1434e0b914304dd2d62e458d103b0e2c1968fa77a0949ab4c7744",
+   "timeSubmitted": 1750000000000,
+   "startTime": 141.8,
+   "endTime": 159.0,
+   "category": "selfpromo",
+   "actionType": "skip",
+   "votes": 7,
+   "views": 300,
+   "locked": 1,
+   "hidden": 0,
+   "shadowHidden": 0,
+   "userID": "bcca965befd11a03e4348c87e72b0c11d3b2fb0107c00c7b445249ec477b1b00",
+   "description": ""
+  },
+  {
+   "UUID": "47fa78d65d7138007a4f27f40482e6c5fdc3a32bea8d73b59f6f2f8698126ec8",
+   "timeSubmitted": 1750000007919,
+   "startTime": 0.0,
+   "endTime": 14.6,
+   "category": "intro",
+   "actionType": "skip",
+   "votes": 5,
+   "views": 361,
+   "locked": 0,
+   "hidden": 0,
+   "shadowHidden": 0,
+   "userID": "8e162dc990340200d9c247c30519b711000bfda904c2f6106fb0fcc70165a3b4",
+   "description": ""
+  },
+  {
+   "UUID": "cf4e86fbabd91253525a3fbe020b10abf757c0d29cb4fb8223d7f22007c21e51",
+   "timeSubmitted": 1750000015838,
+   "startTime": 159.3,
+   "endTime": 163.5,
+   "category": "outro",
+   "actionType": "skip",
+   "votes": 4,
+   "views": 422,
+   "locked": 0,
+   "hidden": 0,
+   "shadowHidden": 0,
+   "userID": "a2548813360735398baaae319c939667d858f1ca4a6301402326a0e525bb0df1",
+   "description": ""
+  }
+ ]
+}

@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>jev-skip</title>
+    <style>
+      :root {
+        --bg: #0b0d12;
+        --card: #141821;
+        --line: #1f2531;
+        --text: #e6e9f0;
+        --dim: #8b93a7;
+        --accent: #4cc9f0;
+      }
+      * { box-sizing: border-box; }
+      html, body {
+        margin: 0;
+        width: 320px;
+        background: var(--bg);
+        color: var(--text);
+        font: 13px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+        font-variant-numeric: tabular-nums;
+      }
+      body { padding: 14px; }
+      header { display: flex; align-items: baseline; justify-content: space-between; }
+      .brand { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); }
+      .model { font-size: 11px; color: #5c6479; }
+      h1 {
+        margin: 10px 0 2px;
+        font-size: 15px;
+        font-weight: 600;
+        line-height: 1.3;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .channel { color: var(--dim); font-size: 12px; margin-bottom: 12px; }
+      .metrics {
+        display: flex;
+        gap: 6px;
+        font-size: 12px;
+        color: var(--dim);
+        margin-bottom: 10px;
+      }
+      .metrics b { color: var(--text); font-weight: 600; }
+      .timeline {
+        position: relative;
+        height: 10px;
+        border-radius: 5px;
+        background: var(--card);
+        overflow: hidden;
+      }
+      .timeline i {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        opacity: 0;
+        transform: scaleX(.2);
+        transform-origin: left center;
+        transition: opacity .35s ease, transform .35s ease;
+      }
+      .timeline i.in { opacity: var(--o); transform: scaleX(1); }
+      .axis {
+        display: flex;
+        justify-content: space-between;
+        font-size: 11px;
+        color: #5c6479;
+        margin: 4px 0 12px;
+      }
+      .status { display: flex; align-items: center; gap: 7px; font-size: 12px; margin-bottom: 14px; }
+      .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--dim); flex: none; }
+      .dot.live { background: var(--accent); animation: pulse 1s ease-in-out infinite; }
+      .dot.done { background: #4ade80; }
+      .dot.error { background: #ff4d6a; }
+      @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
+      .legend {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4px 10px;
+        padding: 10px 0;
+        border-top: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+        font-size: 12px;
+      }
+      .legend div { display: flex; align-items: center; gap: 6px; color: var(--dim); }
+      .legend div.has { color: var(--text); }
+      .legend span.swatch { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+      .legend span.count { margin-left: auto; }
+      .control { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+      .control label { flex: none; color: var(--dim); font-size: 12px; width: 72px; }
+      input[type="range"] { flex: 1; accent-color: var(--accent); }
+      .value { width: 34px; text-align: right; font-size: 12px; }
+      .switch {
+        margin-left: auto;
+        position: relative;
+        width: 34px;
+        height: 18px;
+        border-radius: 9px;
+        background: var(--line);
+        cursor: pointer;
+        transition: background .2s;
+      }
+      .switch.on { background: var(--accent); }
+      .switch::after {
+        content: "";
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: #e6e9f0;
+        transition: transform .2s;
+      }
+      .switch.on::after { transform: translateX(16px); }
+      details { margin-top: 14px; }
+      summary { color: var(--dim); font-size: 12px; cursor: pointer; }
+      input[type="password"], input[type="text"] {
+        width: 100%;
+        margin-top: 8px;
+        padding: 7px 9px;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        background: var(--card);
+        color: var(--text);
+        font: inherit;
+      }
+      .hint { color: #5c6479; font-size: 11px; margin-top: 6px; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <span class="brand">jev-skip</span>
+      <span class="model" id="model">jev-1.13.0</span>
+    </header>
+    <h1 id="title">no video</h1>
+    <div class="channel" id="channel">open a YouTube watch page</div>
+    <div class="metrics">
+      <span><b id="segments">0</b> segments</span><span>·</span>
+      <span><b id="tokens">0</b> est. tokens</span><span>·</span>
+      <span><b id="cost">$0</b></span>
+    </div>
+    <div class="timeline" id="timeline"></div>
+    <div class="axis"><span>0:00</span><span id="end">0:00</span></div>
+    <div class="status"><i class="dot" id="dot"></i><span id="status">idle</span></div>
+    <div class="legend" id="legend"></div>
+    <div class="control">
+      <label for="threshold">skip above</label>
+      <input type="range" id="threshold" min="0.5" max="0.99" step="0.01" />
+      <span class="value" id="thresholdValue">0.85</span>
+    </div>
+    <div class="control">
+      <label>auto-skip</label>
+      <div class="switch" id="autoSkip" role="switch" tabindex="0"></div>
+    </div>
+    <details>
+      <summary>key and endpoint</summary>
+      <input type="password" id="apiKey" placeholder="TypeSafe API key" autocomplete="off" />
+      <input type="text" id="baseUrl" placeholder="https://api.typesafe.ai" autocomplete="off" />
+      <div class="hint">The key is stored in the extension, never in the page.</div>
+    </details>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

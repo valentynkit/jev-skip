@@ -1,0 +1,165 @@
+{
+ "videoId": "synthetic-lamp-review",
+ "model": "typesafe-ai/jev",
+ "elapsedMs": 775,
+ "usage": {
+  "input_tokens": 5740,
+  "output_tokens": 801
+ },
+ "answers": {
+  "s001": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 0.84,
+   "probabilities": {
+    "recap": 0,
+    "intro": 0.16,
+    "self_promo": 0,
+    "sponsor": 0,
+    "content": 0.84,
+    "outro": 0,
+    "other": 0
+   }
+  },
+  "s002": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "recap": 0,
+    "content": 1,
+    "self_promo": 0,
+    "sponsor": 0,
+    "intro": 0,
+    "outro": 0,
+    "other": 0
+   }
+  },
+  "s003": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "recap": 0,
+    "intro": 0,
+    "self_promo": 0,
+    "sponsor": 0,
+    "content": 1,
+    "outro": 0,
+    "other": 0
+   }
+  },
+  "s004": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "recap": 0,
+    "intro": 0,
+    "self_promo": 0,
+    "sponsor": 0,
+    "content": 1,
+    "outro": 0,
+    "other": 0
+   }
+  },
+  "s005": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "recap": 0,
+    "intro": 0,
+    "self_promo": 0,
+    "sponsor": 0,
+    "content": 1,
+    "outro": 0,
+    "other": 0
+   }
+  },
+  "s006": {
+   "type": "choice",
+   "choice": "sponsor",
+   "confidence": 0.88,
+   "probabilities": {
+    "recap": 0,
+    "intro": 0,
+    "self_promo": 0,
+    "sponsor": 0.88,
+    "content": 0.12,
+    "outro": 0,
+    "other": 0
+   }
+  },
+  "s007": {
+   "type": "choice",
+   "choice": "sponsor",
+   "confidence": 1,
+   "probabilities": {
+    "recap": 0,
+    "content": 0,
+    "self_promo": 0,
+    "sponsor": 1,
+    "intro": 0,
+    "outro": 0,
+    "other": 0
+   }
+  },
+  "s008": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 0.62,
+   "probabilities": {
+    "recap": 0,
+    "intro": 0,
+    "self_promo": 0.1,
+    "sponsor": 0.28,
+    "content": 0.62,
+    "outro": 0,
+    "other": 0
+   }
+  },
+  "s009": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "recap": 0,
+    "content": 1,
+    "self_promo": 0,
+    "sponsor": 0,
+    "intro": 0,
+    "outro": 0,
+    "other": 0
+   }
+  },
+  "s010": {
+   "type": "choice",
+   "choice": "recap",
+   "confidence": 0.93,
+   "probabilities": {
+    "recap": 0.93,
+    "content": 0.01,
+    "self_promo": 0.06,
+    "sponsor": 0,
+    "intro": 0,
+    "outro": 0,
+    "other": 0
+   }
+  },
+  "s011": {
+   "type": "choice",
+   "choice": "outro",
+   "confidence": 0.58,
+   "probabilities": {
+    "recap": 0,
+    "intro": 0,
+    "self_promo": 0.42,
+    "sponsor": 0,
+    "content": 0,
+    "outro": 0.58,
+    "other": 0
+   }
+  }
+ }
+}

@@ -1,0 +1,81 @@
+{
+ "segmentCount": 5,
+ "page": 0,
+ "segments": [
+  {
+   "UUID": "402d07823a67fead36d3219200cc57c3016cf898c1ad8775a8a83ed5cd19b8a56",
+   "timeSubmitted": 1643010979202,
+   "startTime": 86.556,
+   "endTime": 151.837,
+   "category": "sponsor",
+   "actionType": "skip",
+   "votes": 0,
+   "views": 187,
+   "locked": 0,
+   "hidden": 0,
+   "shadowHidden": 0,
+   "userID": "640ecb08bb099e29f4085afffd1352e49ca57d9f88b522cd99787ae796b8152e",
+   "description": ""
+  },
+  {
+   "UUID": "db7ea8a9b83a35596d7b95ff19570cc11b42597b22a3817b0c20efb75d12fd9b6",
+   "timeSubmitted": 1643011030764,
+   "startTime": 87.17,
+   "endTime": 151.838,
+   "category": "sponsor",
+   "actionType": "skip",
+   "votes": 2,
+   "views": 1815,
+   "locked": 0,
+   "hidden": 0,
+   "shadowHidden": 0,
+   "userID": "b1a6dcc5792ffd1d6c8818a5e05ec3e3d360508f884a284a867133a5fe57a18d",
+   "description": ""
+  },
+  {
+   "UUID": "f8ae47f49fbdd2ba66d0eac8f9e33c8353c6d65db3f6279db3b44e101ce542176",
+   "timeSubmitted": 1643011127138,
+   "startTime": 86,
+   "endTime": 151.596,
+   "category": "sponsor",
+   "actionType": "skip",
+   "votes": 1,
+   "views": 733,
+   "locked": 0,
+   "hidden": 0,
+   "shadowHidden": 0,
+   "userID": "6f25079c31271c377981a874c1de0c4bb364e3240fd28e58a9bef1c181175d9f",
+   "description": ""
+  },
+  {
+   "UUID": "e4d2163f91408e0ef295d6c559b75259d483a7be4340e87a2d4a8bb24024c8846",
+   "timeSubmitted": 1643014798737,
+   "startTime": 86.437,
+   "endTime": 151.858,
+   "category": "sponsor",
+   "actionType": "skip",
+   "votes": 5,
+   "views": 4213,
+   "locked": 1,
+   "hidden": 0,
+   "shadowHidden": 0,
+   "userID": "ee82f7b0d5185fd50969fd5f162ec4a965e4635e6590785cd83aa494f267226a",
+   "description": ""
+  },
+  {
+   "UUID": "a9509dd6cb2d4ad0617f6b99793a45f690ae2523eed37e8a4b27fac28ba1bbcd6",
+   "timeSubmitted": 1643382704671,
+   "startTime": 86.483,
+   "endTime": 151.943,
+   "category": "sponsor",
+   "actionType": "skip",
+   "votes": 0,
+   "views": 9,
+   "locked": 0,
+   "hidden": 0,
+   "shadowHidden": 0,
+   "userID": "3953c2a7b85b9f167a0497cc6ba4ac159a71402c5479f849b1b7d1dd38ee5e0a",
+   "description": ""
+  }
+ ]
+}

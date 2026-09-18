@@ -1,0 +1,977 @@
+{
+ "videoId": "H4UD4ikOgm4",
+ "model": "typesafe-ai/jev",
+ "elapsedMs": 1133,
+ "usage": {
+  "input_tokens": 34269,
+  "output_tokens": 4983
+ },
+ "answers": {
+  "s001": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 0.47000000000000003,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0.17,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0.36,
+    "content": 0.47000000000000003
+   }
+  },
+  "s002": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 0.93,
+   "probabilities": {
+    "outro": 0,
+    "sponsor": 0,
+    "recap": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0.07,
+    "content": 0.93
+   }
+  },
+  "s003": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 0.9400000000000001,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0.06,
+    "content": 0.9400000000000001
+   }
+  },
+  "s004": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 1
+   }
+  },
+  "s005": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 1
+   }
+  },
+  "s006": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "outro": 0,
+    "sponsor": 0,
+    "recap": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 1
+   }
+  },
+  "s007": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 1
+   }
+  },
+  "s008": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 1
+   }
+  },
+  "s009": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 1
+   }
+  },
+  "s010": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 1
+   }
+  },
+  "s011": {
+   "type": "choice",
+   "choice": "sponsor",
+   "confidence": 0.73,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0.73,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 0.27
+   }
+  },
+  "s012": {
+   "type": "choice",
+   "choice": "sponsor",
+   "confidence": 1,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 1,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 0
+   }
+  },
+  "s013": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 0.59,
+   "probabilities": {
+    "outro": 0.03,
+    "recap": 0,
+    "sponsor": 0.31,
+    "other": 0.06,
+    "self_promo": 0,
+    "intro": 0.01,
+    "content": 0.59
+   }
+  },
+  "s014": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 0.97,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0.03,
+    "content": 0.97
+   }
+  },
+  "s015": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 0.99,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0.01,
+    "content": 0.99
+   }
+  },
+  "s016": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 0.98,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0.02,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 0.98
+   }
+  },
+  "s017": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 1
+   }
+  },
+  "s018": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 1
+   }
+  },
+  "s019": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "outro": 0,
+    "sponsor": 0,
+    "recap": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 1
+   }
+  },
+  "s020": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 1
+   }
+  },
+  "s021": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 1
+   }
+  },
+  "s022": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 1
+   }
+  },
+  "s023": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 1
+   }
+  },
+  "s024": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 0.99,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0.01,
+    "intro": 0,
+    "content": 0.99
+   }
+  },
+  "s025": {
+   "type": "choice",
+   "choice": "self_promo",
+   "confidence": 0.74,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0.1,
+    "other": 0,
+    "self_promo": 0.74,
+    "intro": 0,
+    "content": 0.16
+   }
+  },
+  "s026": {
+   "type": "choice",
+   "choice": "self_promo",
+   "confidence": 0.67,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0.67,
+    "intro": 0,
+    "content": 0.33
+   }
+  },
+  "s027": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 0.97,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0.03,
+    "intro": 0,
+    "content": 0.97
+   }
+  },
+  "s028": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 1
+   }
+  },
+  "s029": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 1
+   }
+  },
+  "s030": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 1
+   }
+  },
+  "s031": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 1
+   }
+  },
+  "s032": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 1
+   }
+  },
+  "s033": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 1
+   }
+  },
+  "s034": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 1
+   }
+  },
+  "s035": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 1
+   }
+  },
+  "s036": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 1
+   }
+  },
+  "s037": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 1
+   }
+  },
+  "s038": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 0.99,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0.01,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 0.99
+   }
+  },
+  "s039": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 0.56,
+   "probabilities": {
+    "outro": 0,
+    "sponsor": 0,
+    "recap": 0.44,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 0.56
+   }
+  },
+  "s040": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 1
+   }
+  },
+  "s041": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 1
+   }
+  },
+  "s042": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 1
+   }
+  },
+  "s043": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "outro": 0,
+    "sponsor": 0,
+    "recap": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 1
+   }
+  },
+  "s044": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 1
+   }
+  },
+  "s045": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 0.58,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0.42,
+    "intro": 0,
+    "content": 0.58
+   }
+  },
+  "s046": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 0.99,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0.01,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 0.99
+   }
+  },
+  "s047": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 0.78,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0.22,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 0.78
+   }
+  },
+  "s048": {
+   "type": "choice",
+   "choice": "recap",
+   "confidence": 0.63,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0.63,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 0.37
+   }
+  },
+  "s049": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 0.91,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0.09,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 0.91
+   }
+  },
+  "s050": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 0.98,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0.01,
+    "sponsor": 0,
+    "other": 0.01,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 0.98
+   }
+  },
+  "s051": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 0.93,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0.05,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0.01,
+    "content": 0.93
+   }
+  },
+  "s052": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 1
+   }
+  },
+  "s053": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 1
+   }
+  },
+  "s054": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 1
+   }
+  },
+  "s055": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 1
+   }
+  },
+  "s056": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 1
+   }
+  },
+  "s057": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 1
+   }
+  },
+  "s058": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 1
+   }
+  },
+  "s059": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 0.99,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0.01,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 0.99
+   }
+  },
+  "s060": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 1
+   }
+  },
+  "s061": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 0.98,
+   "probabilities": {
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0.01,
+    "other": 0.01,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 0.98
+   }
+  },
+  "s062": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 0.67,
+   "probabilities": {
+    "outro": 0.04,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0.28,
+    "intro": 0,
+    "content": 0.67
+   }
+  },
+  "s063": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 0.99,
+   "probabilities": {
+    "outro": 0.01,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 0.99
+   }
+  },
+  "s064": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 0.99,
+   "probabilities": {
+    "outro": 0.01,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 0.99
+   }
+  },
+  "s065": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 0.96,
+   "probabilities": {
+    "outro": 0.03,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0.01,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 0.96
+   }
+  },
+  "s066": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 0.92,
+   "probabilities": {
+    "outro": 0.07,
+    "recap": 0,
+    "sponsor": 0,
+    "other": 0.01,
+    "self_promo": 0,
+    "intro": 0,
+    "content": 0.92
+   }
+  },
+  "s067": {
+   "type": "choice",
+   "choice": "outro",
+   "confidence": 0.73,
+   "probabilities": {
+    "outro": 0.73,
+    "recap": 0.02,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0.03,
+    "intro": 0,
+    "content": 0.22
+   }
+  },
+  "s068": {
+   "type": "choice",
+   "choice": "outro",
+   "confidence": 0.75,
+   "probabilities": {
+    "outro": 0.75,
+    "recap": 0.07,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0.01,
+    "intro": 0,
+    "content": 0.17
+   }
+  },
+  "s069": {
+   "type": "choice",
+   "choice": "outro",
+   "confidence": 0.83,
+   "probabilities": {
+    "outro": 0.83,
+    "recap": 0.01,
+    "sponsor": 0,
+    "other": 0,
+    "self_promo": 0.12,
+    "intro": 0,
+    "content": 0.04
+   }
+  }
+ }
+}

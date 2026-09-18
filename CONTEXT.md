@@ -30,13 +30,17 @@ answer is embarrassing.
 pasted into the popup; captions read from the page; 30-second segments snapped to sentence
 boundaries; one Jev `choice` per segment over
 `content, sponsor, intro, outro, self_promo, recap, other`; heatmap slices with opacity from
-probability; auto-skip above a per-category threshold with a "skipped 42s of sponsor, undo"
-toast; popup with status, cost and the threshold slider; `npm run measure`.
+probability; auto-skip above a per-category threshold with a "skipped 42s of sponsor (0.93)
+· undo" toast; a hover tooltip on a painted slice naming the category, the probability, the
+start time and the first 80 characters behind it; a popup that is a live trace of the current
+video's request (title, segments, estimated tokens and cost, request status with elapsed ms,
+a mini timeline that fills as answers arrive, the seven-category legend with counts, the
+threshold slider, the auto-skip toggle, key and endpoint); `npm run measure`.
 
 **Non-goals:** no server of ours, no shared database, no submissions, no audio transcription,
 no mobile, no other sites, no muting, no chapters, no telemetry.
 
-**v0.2 candidates:** a "why" tooltip showing the text behind a slice; per-channel thresholds;
+**v0.2 candidates:** per-channel thresholds;
 Whisper-in-a-worker for caption-less videos; chapter titles as state; a local "bad skip" log
 feeding the corpus.
 
@@ -191,15 +195,32 @@ It wants a plain videoID, fine for one call from a developer machine. All of it 
 `crowd/<id>.json`. Their `preview` maps to our `recap`; `interaction`, `filler` and
 `music_offtopic` have no counterpart here.
 
-**Selection rule for n=30, so anyone can rebuild it.** Seed from the public dump
-(`sponsorTimes.csv` at sponsor.ajay.app/database): rows with `category=sponsor`, `locked=1`,
-`votes>=5`, `videoDuration` 6 to 40 minutes; a non-empty English caption track; one per
-channel; published 90+ days before the freeze date; sort by videoID ascending, take the first
-30. Sorting by id, not views or recency, is what keeps it from being a cherry-pick. The CSV
-is only a seed: `record` re-reads `locked` and `userID` from `searchSegments`, the fields the
-guard uses, and drops any candidate whose `locked = 1` row no longer stands, pulling the next
-id in order. Selection and guard never read different sources. The three layers land as
+**Selection rule for n=30, so anyone can rebuild it.** Builder's change, 2026-09-18: the
+`sponsorTimes.csv` dump is multi-GB, so the seed is the same database read through the
+k-anonymity endpoint instead. Walk `GET /api/skipSegments/<4-hex prefix>?categories=["sponsor"]`
+with prefixes ascending from `0000`, keep rows with `locked=1`, `votes>=5` and `videoDuration`
+6 to 40 minutes, one video per channel (channel from the public oembed endpoint), sort by
+videoID ascending, take the first 30. Walking the hash space in order, not by views or
+recency, is what keeps it from being a cherry-pick. The prefix walk is only a seed: `record`
+re-reads `locked` and `userID` from `searchSegments`, the fields the guard uses, and drops any
+candidate whose `locked = 1` row no longer stands, pulling the next id in order. Selection and
+guard never read different sources. The three layers land as
 `scripts/fake-jev.ts` (`research/01` section 3), the recording proxy, and `measure`.
+
+**Where the captions come from.** Builder's change: the `timedtext` URL is session-signed, so
+a script outside the watch tab gets an empty 200 (section 3). `record --corpus` shells out to
+`yt-dlp --skip-download --write-auto-sub --write-sub --sub-lang "en.*" --sub-format json3`
+and keeps only the three json3 fields the parser reads, which takes the corpus from 6.3MB to
+1.0MB. Of the 30 selected videos, 23 had a caption track we could read; the other 7 are
+dropped rather than padded around, so n is 23 and the README says 23. Four hand-written
+synthetic videos (`fixtures/videos/synthetic-*`, one of them Spanish) stay in the corpus for
+the failure-mode tests and for an offline demo; they are flagged `synthetic: true` and never
+counted in the headline while real videos exist.
+
+**Two arms.** `record` and `measure` both take `--no-markers`, which rebuilds the same
+requests with `has_promo_markers` forced false and reads or writes `fixtures/answers-nomarkers/`.
+Both numbers get reported, so shipping the regex belt as state evidence stays a measured
+choice rather than an argument.
 
 **What agreement means, honestly.** Crowd coverage is sparse by construction, so an
 unlabeled second is unlabeled, not confirmed content. That cuts both ways: "we said content,
@@ -353,14 +374,13 @@ QuickTime a cropped window (not the 5120x1440 desktop), then `research/04` secti
 two-pass palette command at 800px/15fps, under 5MB; the .mov as H.264 MP4 for X; a still of
 a confident slice beside a faint one.
 
-## 9. Open questions
+## 9. Open questions, answered by the user 2026-09-18
 
-1. On install, auto-skip at 0.85 or paint-only until the user opts in? Auto-skip makes the
-   demo and risks the first impression being a wrong skip; paint-only is safe and dull.
-2. Ship the promo-marker belt as state evidence, or keep state purely transcript so the
-   number measures Jev alone? It probably helps recall and definitely muddies the claim.
-3. Firefox or Chrome for the demo recording, given the 600ms lead makes Firefox skips
-   visibly later?
+1. Auto-skip is on by default at 0.85, with the undo toast. The popup carries a toggle that
+   turns it into paint-only.
+2. `has_promo_markers` ships as state evidence as designed, and `measure --no-markers` scores
+   the arm without it, so both numbers get published.
+3. Chrome for the demo recording.
 
 ## Review round 1: responses
 
@@ -381,3 +401,31 @@ All six fixed in sections 1, 3, 4 and 5, confirmed by REVIEW-2's resolution tabl
 
 - Caption dedup rule: written into task 2 (three-word overlapping tail) with a fixture check.
 - Fake, recorder, corpus: new task 8 with a dry-run check and a zero-network second run; measure is task 9, ship is task 10.
+
+## Build notes, 2026-09-18
+
+Changes the build made to this document, each one because a task proved the original wrong:
+
+- **Endpoint is configurable.** The popup carries a base URL next to the key, defaulting to
+  `https://api.typesafe.ai`. The only Jev access we have today is a localhost shim in front
+  of the Vercel AI Gateway, and a demo that cannot point at it is a demo that cannot run.
+  The shim answers with `model: "typesafe-ai/jev"`, so anything recorded through it says so
+  and has to be re-measured on the direct API before a threshold is pinned to `jev-1.13.0`.
+- **Firefox builds MV2**, which is WXT's default for that target. Firefox MV3 makes host
+  permissions opt-in, so the extension would install and quietly do nothing until the user
+  found the permission prompt. Chrome stays MV3.
+- **Corpus is 23 real videos, not 30.** Selection picks 30 by the rule in section 5; seven
+  of them have no English caption track a script can read. Padding the list to 30 would mean
+  reaching past the sort order, which is the one thing the rule exists to prevent.
+- **Answers keep three directories.** `fixtures/answers/` is recorded from a real endpoint,
+  `fixtures/answers-nomarkers/` is the `--no-markers` arm, `fixtures/answers-fake/` comes
+  from `scripts/fake-jev.ts`. `measure` prints which one it scored, and a run that touched
+  the fake says "fake answers, not the model" in its own headline.
+- **The marker arm has a first number.** On the 12 videos recorded in both arms:
+  79.0% recall with `has_promo_markers` in state against 73.4% without, at 27.8 versus
+  27.1 false-skip seconds per hour. The belt buys about six points of recall and costs
+  nothing on the guard, so it ships. Both arms need re-recording on the direct API, and the
+  remaining 11 videos of the no-markers arm are still missing to gateway rate limits.
+- **The popup is the product surface**, not a settings page: title, segment count, estimated
+  tokens and cost, live request status, a mini heatmap that animates slices in as they land,
+  and the legend. The "why" tooltip from the v0.2 list moved into v0.1 with it, twenty lines.

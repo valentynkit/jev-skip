@@ -1,0 +1,11 @@
+{
+  "extends": "./.wxt/tsconfig.json",
+  "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": false,
+    "allowImportingTsExtensions": true,
+    "types": ["node"]
+  },
+  "include": ["**/*.ts", "**/*.tsx", ".wxt/wxt.d.ts"],
+  "exclude": ["dist", "node_modules"]
+}

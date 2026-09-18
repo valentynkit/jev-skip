@@ -1,0 +1,36 @@
+{
+ "segmentCount": 2,
+ "page": 0,
+ "segments": [
+  {
+   "UUID": "5636b6062aeaa7e9b5c45aee2ae22b4893424c7c7fc287dd524059c9cfcb8ebc",
+   "timeSubmitted": 1750000000000,
+   "startTime": 78.2,
+   "endTime": 113.0,
+   "category": "sponsor",
+   "actionType": "skip",
+   "votes": 11,
+   "views": 300,
+   "locked": 1,
+   "hidden": 0,
+   "shadowHidden": 0,
+   "userID": "a277364ae85e925f019c22f95174a1eedb6aedf7214e0cffa249fbb1856d4c9c",
+   "description": ""
+  },
+  {
+   "UUID": "e092bc73ef39923c4ec5b0ae72fa5632d910e20d1e226ae4996f5e2cb1a5652b",
+   "timeSubmitted": 1750000007919,
+   "startTime": 152.8,
+   "endTime": 158.2,
+   "category": "outro",
+   "actionType": "skip",
+   "votes": 3,
+   "views": 361,
+   "locked": 0,
+   "hidden": 0,
+   "shadowHidden": 0,
+   "userID": "aa7f4c421e0d02f9b6b2b3e68916f8eb169e41712007269e547257bb6fa0d3b8",
+   "description": ""
+  }
+ ]
+}

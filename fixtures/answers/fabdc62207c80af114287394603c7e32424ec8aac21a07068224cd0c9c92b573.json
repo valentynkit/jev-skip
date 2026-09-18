@@ -1,0 +1,81 @@
+{
+ "videoId": "synthetic-radiator-shelf",
+ "model": "typesafe-ai/jev",
+ "elapsedMs": 7120,
+ "usage": {
+  "input_tokens": 2798,
+  "output_tokens": 368
+ },
+ "answers": {
+  "s001": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 0.95,
+   "probabilities": {
+    "content": 0.95,
+    "self_promo": 0,
+    "outro": 0,
+    "sponsor": 0,
+    "recap": 0,
+    "other": 0,
+    "intro": 0.05
+   }
+  },
+  "s002": {
+   "type": "choice",
+   "choice": "content",
+   "confidence": 1,
+   "probabilities": {
+    "content": 1,
+    "self_promo": 0,
+    "outro": 0,
+    "sponsor": 0,
+    "recap": 0,
+    "other": 0,
+    "intro": 0
+   }
+  },
+  "s003": {
+   "type": "choice",
+   "choice": "sponsor",
+   "confidence": 0.86,
+   "probabilities": {
+    "content": 0.09,
+    "self_promo": 0.05,
+    "outro": 0,
+    "recap": 0,
+    "sponsor": 0.86,
+    "other": 0,
+    "intro": 0
+   }
+  },
+  "s004": {
+   "type": "choice",
+   "choice": "sponsor",
+   "confidence": 0.99,
+   "probabilities": {
+    "content": 0.01,
+    "self_promo": 0,
+    "outro": 0,
+    "sponsor": 0.99,
+    "recap": 0,
+    "other": 0,
+    "intro": 0
+   }
+  },
+  "s005": {
+   "type": "choice",
+   "choice": "outro",
+   "confidence": 0.65,
+   "probabilities": {
+    "content": 0.33,
+    "self_promo": 0.01,
+    "outro": 0.65,
+    "sponsor": 0,
+    "recap": 0.01,
+    "other": 0,
+    "intro": 0
+   }
+  }
+ }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "jev-skip",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Skips YouTube sponsors on videos nobody has labeled yet",
+  "license": "MIT",
+  "scripts": {
+    "dev": "wxt",
+    "build": "wxt build",
+    "build:firefox": "wxt build -b firefox",
+    "zip": "wxt zip",
+    "zip:firefox": "wxt zip -b firefox",
+    "postinstall": "wxt prepare",
+    "test": "vitest run",
+    "fake-jev": "node scripts/fake-jev.ts",
+    "record": "node scripts/record.ts",
+    "measure": "node scripts/measure.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "jsdom": "^26.0.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0",
+    "wxt": "^0.21.0"
+  }
+}
