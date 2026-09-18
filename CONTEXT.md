@@ -256,9 +256,12 @@ Layout: `entrypoints/{background.ts,youtube.content.ts,popup/}`,
    Check: `npm run build && npm run build:firefox` both emit and load unpacked, popup opens
    on a watch page.
 2. **Captions.** Player-response extraction, track selection, `fmt=json3` fetch, cue parse,
-   rolling-duplicate dedup.
+   rolling-duplicate dedup. Dedup rule: auto-captions repeat the tail of cue N as the head of
+   cue N+1; when cue N+1's text starts with the last three or more words of cue N, drop that
+   prefix from N+1, and drop N+1 entirely if nothing remains.
    Check: `npm test -- captions` turns a json3 fixture into the expected cue count and
-   duration; a caption-less one returns null without throwing.
+   duration, an auto-caption fixture with overlapping tails dedups to the expected text, and a
+   caption-less one returns null without throwing.
 3. **Segmenter.** 30s windows, sentence snapping, 45s cap, promo-marker belt.
    Check: `npm test -- segment` asserts every boundary lands on a sentence end when one exists
    within ±8s, no window exceeds 45s, markers fire on a known sponsor read.
@@ -278,13 +281,21 @@ Layout: `entrypoints/{background.ts,youtube.content.ts,popup/}`,
 7. **Scheduler.** Armed timer, re-arm on the five events, threshold gate, undo toast.
    Check: `npm test -- schedule` with a fake video element asserts one pending timer, re-arm
    on `seeked`, none below threshold, `currentTime` landing at segment end.
-8. **Measure.** Scorer, sweep, JSON writer, both gates, dense-subset filter.
+8. **Fake, recorder, corpus.** `scripts/fake-jev.ts` (fixture-driven, research/01 section
+   3), `scripts/record.ts` (the recording proxy keyed by `sha256(state + questions)`, plus the
+   corpus curation step: apply the section 5 selection rule against the SponsorBlock CSV dump,
+   fetch `searchSegments` per video, write `fixtures/videos/<id>/{captions.json3,crowd.json}`).
+   Check: `npm test -- jev` passes against `scripts/fake-jev.ts` on a random port;
+   `npm run record -- --dry-run` lists the 30 selected video ids with their locked count and
+   distinct submitter count and writes nothing; with `TYPESAFE_API_KEY` set, `npm run record`
+   fills `fixtures/answers/` and a second run makes zero network calls.
+9. **Measure.** Scorer, sweep, JSON writer, both gates, dense-subset filter.
    Check, network unplugged: with `thresholds.json` present, `npm run measure` prints the four
    lines, writes `measure.json`, exits 0; `--predictions fixtures/pred-low.json` (nothing
    sponsor) exits 1 on the recall floor; `--predictions fixtures/pred-greedy.json` (everything
    sponsor) exits 1 on the false-skip ceiling; with `thresholds.json` gone it prints
    "unlocked, no gate" and exits 0.
-9. **Ship.** README, `.env.example`, MIT, CHANGELOG, `v0.1.0`.
+10. **Ship.** README, `.env.example`, MIT, CHANGELOG, `v0.1.0`.
    Check: `npm run zip && npm run zip:firefox` produce both artifacts; a clean clone plus the
    README's steps reaches a painted bar.
 
@@ -361,7 +372,12 @@ All six fixed in sections 1, 3, 4 and 5, confirmed by REVIEW-2's resolution tabl
    `votes`, `views`, `locked`, `timeSubmitted` and a hashed `userID`; `skipSegments` returns
    none of those. Dense subset is `locked = 1` plus three or more distinct `userID` values,
    stored in `crowd/<id>.json`, reported as an upper bound. Selection re-reads the same fields.
-2. Exit gates: fixed. Task 8 runs four cases, two prediction files failing one gate each, a
+2. Exit gates: fixed. Task 9 (measure) runs four cases, two prediction files failing one gate each, a
    clean pass, and the pre-lock case that exits 0.
 3. Paint rule: fixed in section 3; task 6 asserts the positive and the `content`-at-0.99
    negative.
+
+## Review round 3: responses
+
+- Caption dedup rule: written into task 2 (three-word overlapping tail) with a fixture check.
+- Fake, recorder, corpus: new task 8 with a dry-run check and a zero-network second run; measure is task 9, ship is task 10.
