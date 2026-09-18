@@ -4,6 +4,14 @@ import { CATEGORY_COLOR, PAINTED, formatTime, type Slice } from "./types.ts";
 export const PAINT_FLOOR = 0.2;
 export const MAX_OPACITY = 0.85;
 
+/**
+ * Measured on a watch page 2026-09-19: inside .ytp-progress-bar YouTube stacks chapters at
+ * 32, clip excludes at 37, timed markers at 40 and the scrubber at 43. Below 40 the slices
+ * hide under YouTube's own layers and the markers container swallows every hover, which is
+ * what a z-index of 1 did. Above the scrubber the drag handle would disappear.
+ */
+export const BAR_Z = 42;
+
 export function paintable(slice: Slice, floor = PAINT_FLOOR): boolean {
   return PAINTED.includes(slice.category) && slice.p >= floor;
 }
@@ -26,7 +34,7 @@ export function mountBar(progressBar: HTMLElement): BarHandle {
   const list = doc.createElement("ul");
   list.className = "jev-skip-bar";
   list.style.cssText =
-    "position:absolute;inset:0;margin:0;padding:0;list-style:none;pointer-events:none;z-index:1;";
+    `position:absolute;inset:0;margin:0;padding:0;list-style:none;pointer-events:none;z-index:${BAR_Z};`;
 
   const tip = doc.createElement("div");
   tip.className = "jev-skip-tip";

@@ -77,6 +77,15 @@ describe("seek bar", () => {
     expect(progress.childElementCount).toBe(0);
   });
 
+  it("stacks above YouTube's timed markers and below its scrubber", () => {
+    const bar = mountBar(progress);
+    const z = Number((progress.querySelector(".jev-skip-bar") as HTMLElement).style.zIndex);
+    // Measured layers on a real watch page: markers 40, scrubber 43.
+    expect(z).toBeGreaterThan(40);
+    expect(z).toBeLessThan(43);
+    bar.destroy();
+  });
+
   it("paints nothing when the duration is not known yet", () => {
     const bar = mountBar(progress);
     bar.update([slice({})], 0);

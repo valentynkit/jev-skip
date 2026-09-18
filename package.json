@@ -20,6 +20,7 @@
   "devDependencies": {
     "@types/node": "^24.0.0",
     "jsdom": "^26.0.0",
+    "playwright": "1.63",
     "typescript": "^5.7.0",
     "vitest": "^3.0.0",
     "wxt": "^0.21.0"
