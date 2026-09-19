@@ -12,6 +12,9 @@ export const MAX_OPACITY = 0.85;
  */
 export const BAR_Z = 42;
 
+/** A batch fades in over this long, end to end. Long enough to read, short enough to miss. */
+export const PAINT_IN_MS = 400;
+
 export function paintable(slice: Slice, floor = PAINT_FLOOR): boolean {
   return PAINTED.includes(slice.category) && slice.p >= floor;
 }
@@ -29,8 +32,18 @@ const pct = (value: number) => `${(Math.max(0, Math.min(1, value)) * 100).toFixe
  * mechanics SponsorBlock uses (src/js-components/previewBar.ts:409-443). The semantics are
  * ours: one hue per category, opacity from probability, so a borderline sponsor is a ghost.
  */
-export function mountBar(progressBar: HTMLElement): BarHandle {
+export interface BarOptions {
+  /** Budget for a whole batch to fade in. The eye reads the bar filling; the clock doesn't. */
+  paintInMs?: number;
+}
+
+export function mountBar(progressBar: HTMLElement, options: BarOptions = {}): BarHandle {
+  const paintInMs = options.paintInMs ?? PAINT_IN_MS;
   const doc = progressBar.ownerDocument;
+  /** Slice id to node, so an answer that already landed is never repainted. */
+  const nodes = new Map<string, HTMLLIElement>();
+  /** Which batch of answers a slice arrived in, which is what the paint-in is showing. */
+  let batch = 0;
   const list = doc.createElement("ul");
   list.className = "jev-skip-bar";
   list.style.cssText =
@@ -48,35 +61,64 @@ export function mountBar(progressBar: HTMLElement): BarHandle {
   return {
     element: list,
     update(slices, duration) {
-      // The hovered li is about to be removed, and nothing would ever hide its tooltip.
+      // A hovered node can be removed below, and nothing would ever hide its tooltip.
       tip.style.display = "none";
-      for (const node of Array.from(list.querySelectorAll("li"))) node.remove();
       // A live stream reports Infinity, which is > 0 and would put every slice at zero width.
-      if (!(duration > 0) || !Number.isFinite(duration)) return;
-      for (const slice of slices) {
-        if (!paintable(slice)) continue;
-        const li = doc.createElement("li");
+      const usable = duration > 0 && Number.isFinite(duration);
+      const painted = usable ? slices.filter((s) => paintable(s)) : [];
+      const keep = new Set(painted.map((s) => s.id));
+      for (const [id, node] of nodes) {
+        if (keep.has(id)) continue;
+        node.remove();
+        nodes.delete(id);
+      }
+
+      // Answers land in batches, so a batch fades in together rather than one slice at a
+      // time. Slices already on the bar keep their node and never re-animate.
+      const arriving = painted.filter((s) => !nodes.has(s.id));
+      const step = arriving.length > 1 ? paintInMs / (arriving.length - 1) : 0;
+      let index = 0;
+      if (arriving.length) batch += 1;
+
+      for (const slice of painted) {
+        const existing = nodes.get(slice.id);
+        const li = existing ?? doc.createElement("li");
         li.dataset.category = slice.category;
         li.dataset.p = slice.p.toFixed(2);
-        li.style.cssText = "position:absolute;top:0;bottom:0;pointer-events:auto;";
+        const opacity = String(Math.min(MAX_OPACITY, Math.max(PAINT_FLOOR, slice.p)));
+        if (!existing) {
+          li.style.cssText =
+            `position:absolute;top:0;bottom:0;pointer-events:auto;opacity:0;` +
+            `transition:opacity ${(paintInMs / 1000).toFixed(2)}s ease;`;
+          li.style.transitionDelay = `${((index * step) / 1000).toFixed(3)}s`;
+          li.dataset.batch = String(batch);
+          index += 1;
+        }
         li.style.left = pct(slice.start / duration);
         li.style.right = pct(1 - Math.min(slice.end, duration) / duration);
         li.style.backgroundColor = CATEGORY_COLOR[slice.category];
-        li.style.opacity = String(Math.min(MAX_OPACITY, Math.max(PAINT_FLOOR, slice.p)));
         // The v0.2 "why" tooltip, pulled forward: the text behind the slice is the whole
         // argument for trusting a probability nobody voted on.
-        li.addEventListener("mouseenter", () => {
+        li.onmouseenter = () => {
           tip.textContent = `${slice.category} ${Math.round(slice.p * 100)}% at ${formatTime(slice.start)} · ${slice.text.slice(0, 80)}`;
           tip.style.left = li.style.left;
           tip.style.display = "block";
-        });
-        li.addEventListener("mouseleave", () => {
+        };
+        li.onmouseleave = () => {
           tip.style.display = "none";
-        });
-        list.append(li);
+        };
+        if (!existing) {
+          list.append(li);
+          nodes.set(slice.id, li);
+          // Reading a layout property flushes the opacity:0 start, so the transition has
+          // somewhere to run from. Without it the browser collapses both values into one.
+          void li.offsetWidth;
+        }
+        li.style.opacity = opacity;
       }
     },
     destroy() {
+      nodes.clear();
       list.remove();
     },
   };

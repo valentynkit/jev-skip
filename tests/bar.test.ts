@@ -114,3 +114,36 @@ describe("seek bar, after the review", () => {
     bar.destroy();
   });
 });
+
+describe("seek bar, painting for the camera", () => {
+  it("keeps the node for a slice it already painted and animates only the new one", () => {
+    const bar = mountBar(progress);
+    bar.update([slice({ id: "s001", start: 30, end: 60 })], 300);
+    const first = progress.querySelector("li")!;
+    bar.update(
+      [slice({ id: "s001", start: 30, end: 60 }), slice({ id: "s002", start: 90, end: 120 })],
+      300,
+    );
+    const items = progress.querySelectorAll("li");
+    expect(items).toHaveLength(2);
+    expect(items[0]).toBe(first);
+    expect(items[0].dataset.batch).toBe("1");
+    expect(items[1].dataset.batch).toBe("2");
+    bar.destroy();
+  });
+
+  it("staggers a batch inside the paint-in budget", () => {
+    const bar = mountBar(progress, { paintInMs: 400 });
+    bar.update(
+      Array.from({ length: 8 }, (_, i) => slice({ id: `s${i}`, start: i * 30, end: i * 30 + 30 })),
+      300,
+    );
+    const delays = [...progress.querySelectorAll("li")].map((li) =>
+      Number.parseFloat((li as HTMLElement).style.transitionDelay),
+    );
+    expect(delays[0]).toBe(0);
+    expect(Math.max(...delays)).toBeLessThanOrEqual(0.4);
+    expect(delays).toStrictEqual([...delays].sort((a, b) => a - b));
+    bar.destroy();
+  });
+});

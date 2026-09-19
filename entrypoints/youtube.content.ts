@@ -58,7 +58,10 @@ export default defineContentScript({
     function attach(video: HTMLVideoElement) {
       const progress = document.querySelector<HTMLElement>(".ytp-progress-bar");
       if (!progress || bar) return;
-      bar = mountBar(progress);
+      // ?jevdemo on the watch URL slows the paint-in for a screen recording. It changes
+      // nothing else: same answers, same timings, same skips.
+      const demo = new URL(location.href).searchParams.has("jevdemo");
+      bar = mountBar(progress, demo ? { paintInMs: 1400 } : {});
       scheduler = createScheduler(video, {
         threshold: 0.85,
         autoSkip: true,
