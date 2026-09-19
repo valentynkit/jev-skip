@@ -122,18 +122,43 @@ keep whatever caption URL the player signs for itself, and re-ask for it as json
 returned 1,461 cues covering all 1,634 seconds of the test video. `entrypoints/injected.ts`
 now does exactly this, and the watch-page re-fetch is gone.
 
-**Still unverified: the whole pipeline inside the extension on a live page.** Neither
-browser on this machine can show it:
+**Verified end to end** later the same day, in Google Chrome 153 installed for the purpose:
 
-- Playwright's Chromium is bot-walled, and in the last run could not even resolve the
-  googlevideo hosts, so the player never loads and never asks for captions.
+    botWall: false, playback readyState 4
+    barMounted: true, paintedSlices: 3
+    trace: status done, segmentCount 54, slices 54, nonContent 3
+
+Fifty-four segments from captions the extension fetched by itself, answered from the
+recording, painted on the bar. The live segmentation matched the fixture segmentation
+exactly, which is why the recorded answers lined up by id.
+
+Two browsers here could not show it, for unrelated reasons worth writing down:
+
+- Playwright's Chromium is bot-walled, and in one run could not even resolve the
+  googlevideo hosts, so the player never loaded and never asked for captions.
 - Arc plays video fine but silently drops the extension's own `storage.local` writes. The
   same build in plain Chromium stores settings correctly and returns a reply; in Arc the
   `set-settings` branch never runs at all, while `get-state` in the same listener does.
   Not chased further. It means jev-skip cannot be configured in Arc.
+- Chrome 137 dropped `--load-extension`, so Chrome cannot be given an unpacked build from
+  the command line at all. It goes in once through `chrome://extensions` by hand, and
+  everything after that drives the running browser over CDP.
 
-What that leaves: the fix is right at the URL level and the code follows the proven route,
-but nobody has yet watched the bar paint from captions the extension read by itself.
+## Reliability, measured 2026-09-19
+
+The page hook was going in as an injected `<script src>`, which loads asynchronously, so the
+player could ask for captions before the hook existed. A lost race looks exactly like a
+video with no captions. On Chrome the hook is now a MAIN-world content script at
+`document_start`, which the browser runs before any page script; Firefox MV2 has no MAIN
+world and keeps the injected file.
+
+`scripts/reliability.mjs`, cold loads across five corpus videos:
+
+    before the fix   roughly one load in three painted nothing (filming the demo)
+    after the fix    29 of 30 painted, median 2.9s from navigation to first slice
+
+The one miss had no bot wall, a live player and the hook installed, so the player simply
+never asked for captions inside the window. Reloading the page fixes it.
 
 ## What this means for the demo
 

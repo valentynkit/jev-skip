@@ -2,7 +2,8 @@
 
 Skips YouTube sponsors on videos nobody has labeled yet. Catches 77% of the sponsor seconds
 SponsorBlock's crowd marked across 23 videos, at 34s of false skips per hour, for $0.0008 a
-video, with the bar painted 0.9s after the request goes out.
+video, with answers 0.9s after the request goes out and slices on the bar within about
+three seconds of opening the page.
 
     npm install && npm run build   # then load dist/chrome-mv3 unpacked, paste your key
 
@@ -93,6 +94,10 @@ URL and the video's title; it never sees the key.
     npm run record -- --corpus    # fetch captions and crowd labels for the selection
     npm run record                # judge the corpus once and cache the answers, needs a key
 
+`scripts/reliability.mjs` counts how often the bar paints over cold loads, and
+`scripts/record-demo.mjs` films a take; both drive a browser that already has the extension
+loaded, over CDP. `docs/browser-ground-truth.md` explains why it is done that way.
+
 `measure` writes `measure.json` next to the four lines: per-video rows, the threshold sweep,
 the reliability bins, the pessimistic intersection-over-union figure, and the non-English
 videos it kept out of the headline. `thresholds.json` turns the recall floor and the
@@ -101,10 +106,10 @@ false-skip ceiling into exit codes.
 ## Known limits
 
 - No captions, no opinion. It reads text, not audio.
-- The caption read depends on the player signing a URL and on us seeing it. It sometimes
-  does not paint on the first load; reloading the page fixes it. Roughly one attempt in
-  three came up empty while filming the demo, which is a real reliability problem and not
-  yet a measured number.
+- The caption read depends on the player signing a URL and on the extension seeing it.
+  Measured 2026-09-19 in Chrome 153 over five videos: 29 of 30 cold loads painted, median
+  2.9s from navigation to the first slice. That is one machine and one browser, not a
+  promise. A load that misses paints nothing at all; reloading fixes it.
 - If YouTube changes how the player requests captions, this breaks. That is one upstream
   decision away, and the repo has no fallback for it.
 - Chrome is the only browser this has run in. Firefox MV2 builds and is untested. Arc

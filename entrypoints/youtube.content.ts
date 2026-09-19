@@ -203,11 +203,15 @@ export default defineContentScript({
       },
     );
 
-    // A file, not an inline string: YouTube's CSP refuses inline script.
-    const page = document.createElement("script");
-    page.src = browser.runtime.getURL("/injected.js" as never);
-    page.addEventListener("load", () => page.remove());
-    (document.head ?? document.documentElement).append(page);
+    // Chrome installs the page hook as a MAIN-world content script before any page script
+    // runs. Firefox MV2 has no MAIN world, so there it goes in as a file; inline is not an
+    // option under YouTube's CSP. Injecting on Chrome too would only re-run a no-op.
+    if (firefox) {
+      const page = document.createElement("script");
+      page.src = browser.runtime.getURL("/injected.js" as never);
+      page.addEventListener("load", () => page.remove());
+      (document.head ?? document.documentElement).append(page);
+    }
 
     document.addEventListener("yt-navigate-finish", () => void start());
     window.addEventListener("popstate", () => void start());

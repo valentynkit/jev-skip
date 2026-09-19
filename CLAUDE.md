@@ -8,16 +8,22 @@ Verdict after three review rounds: **ready to build**.
 
 ## Build state (2026-09-19, after the review session)
 
-Tasks 1 to 10 coded, reviewed, and fixed. `npm test` 42 tests in 7 files, all passing,
-offline. Both builds emit and the content bundles contain no `apiKey` or `Bearer`.
+Tasks 1 to 10 coded, reviewed, fixed, and filmed. `npm test` 52 tests in 7 files, all
+passing, offline. Both builds emit and the content bundles contain no `apiKey` or `Bearer`.
 
-The extension has now been loaded into a real browser (Playwright's Chromium: no Chrome and
-no Firefox exist on this machine). It mounts and paints on a live watch page. It has still
-never completed its own pipeline end to end, because YouTube shows an automated profile
-"Sign in to confirm you're not a bot", which returns empty caption bodies and blocks
-playback. Read `docs/browser-ground-truth.md` before trusting anything about runtime
-behaviour, and `docs/review-01.md` for what the five reviewers found, what was fixed, what
-was rejected, and what is deferred.
+The pipeline now runs end to end in Google Chrome 153 on a live watch page: the extension
+reads the caption track itself, segments it, asks, paints, and skips. Getting there meant
+finding out why it never could before: a timedtext URL without a proof-of-origin token is
+answered with 200 and an empty body, so the extension takes the URL the player signs for
+itself (`lib/page-hook.ts`, installed as a MAIN-world content script).
+
+Reliability, measured: 29 of 30 cold loads paint, median 2.9s to the first slice
+(`scripts/reliability.mjs`). Before the hook moved out of an async `<script src>` and into
+a MAIN-world script it was roughly two in three.
+
+Read `docs/browser-ground-truth.md` before trusting anything about runtime behaviour, and
+`docs/review-01.md` for what the five reviewers found, what was fixed, what was rejected,
+and what is deferred. The demo clip and how it was shot are in `demo/README.md`.
 
 Two published numbers moved in that session: false-skip 27.2 to 34.0 s/h (it was only
 counting two of the five categories the extension actually skips) and Brier 0.117 to 0.105.
@@ -60,22 +66,21 @@ chunks, the direct-API re-measure, the segmentation fixes in `docs/review-01.md`
 segmentation rehashes every request and orphans all 27 recorded answer files), and any demo
 clip that shows a live call rather than a replay.
 
-Also blocked on a logged-in browser session: whether the caption fetch works for real users
-is still unknown, and it is the one fact that decides whether v0.1 works at all.
+Chrome is the only browser this has run in. Firefox MV2 builds and is untested; Arc drops
+the extension's storage writes, so the key cannot be saved there.
 
 ## Next sessions
 
-`sessions/01-review.md` (brutal review, a real browser, fixes, README, hygiene, store
-listing) then `sessions/02-demo.md` (the screen recording of the bar filling and a skip
-firing, the X thread). Each in its own session.
+Sessions 01 (review) and 02 (demo) are both done; their prompts stay in `sessions/` as the
+record of what was asked for. What is left needs things this machine does not have:
 
-Review targets: the extension has never run on a real watch page (player-response scrape,
-SPA navigation, the `.ytp-progress-bar` container, ads shifting `currentTime`, live
-streams, Shorts, embedded players, playlists); the popup's live trace across
-`storage.session` on Firefox MV2; key isolation under a compromised content script; the
-skip timer versus YouTube's own ad skips and chapter seeks; the 45 s cap and sentence
-snapping on auto-captions with no punctuation; token estimate versus real usage; the
-selection rule's reproducibility from a clean machine.
+- A TypeSafe key: the direct-API re-measure, pinning `jev-1.13.0`, the remaining 15
+  no-markers chunks, the deferred segmentation fixes, and a clip that shows a live call on
+  a video the crowd has never labeled.
+- A Firefox install: the MV2 build has never been loaded anywhere.
+- Launch copy: the X thread, the Show HN title, the r/SponsorBlock and r/youtube posts, and
+  the awesome-list line. `docs/research/00a-virality-recipe.md` and `docs/research/04`
+  section 1 hold the shape; `demo/README.md` holds what the clip may and may not claim.
 
 Project-specific rules:
 - WXT + TypeScript, MV3, Chrome and Firefox from one build.
