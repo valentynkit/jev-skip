@@ -23,12 +23,12 @@ if (!videoId) {
 }
 
 const key = flag("key", process.env.JEV_API_KEY ?? "shim");
-const baseUrl = flag("base-url", process.env.JEV_BASE_URL ?? "http://127.0.0.1:4322");
+const baseUrl = flag("base-url", process.env.JEV_BASE_URL ?? "http://127.0.0.1:4333");
 const seconds = Number(flag("seconds", 45));
 const videoDir = flag("video", null);
 const extension = new URL("../dist/chrome-mv3", import.meta.url).pathname;
 
-const profile = await mkdtemp(join(tmpdir(), "jev-skip-"));
+const profile = flag("profile", null) ?? (await mkdtemp(join(tmpdir(), "jev-skip-")));
 const context = await chromium.launchPersistentContext(profile, {
   headless: false,
   viewport: { width: 1280, height: 800 },
@@ -126,4 +126,4 @@ console.log(
 );
 
 await context.close();
-await rm(profile, { recursive: true, force: true });
+if (!flag("profile", null)) await rm(profile, { recursive: true, force: true });

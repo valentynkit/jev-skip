@@ -17,6 +17,11 @@ export default defineConfig({
     description: "Skips YouTube sponsors on videos nobody has labeled yet.",
     permissions: ["storage"],
     host_permissions: ["https://*.youtube.com/*", "https://api.typesafe.ai/*", ...localhost],
+    // The page script the content script injects, so it can see the caption URL the
+    // player signs. It posts back what it finds and holds no key.
+    web_accessible_resources: [
+      { resources: ["injected.js"], matches: ["https://*.youtube.com/*"] },
+    ],
     browser_specific_settings: {
       gecko: { id: "jev-skip@jev-lab", strict_min_version: "121.0" },
     },

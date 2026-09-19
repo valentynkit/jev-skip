@@ -12,14 +12,46 @@ const [command = "check", videoId = "4RcThoRG46c"] = process.argv.slice(2);
 const browser = await chromium.connectOverCDP("http://127.0.0.1:9222");
 const context = browser.contexts()[0];
 
+const worker =
+  context.serviceWorkers().find((w) => w.url().includes("background")) ??
+  context.serviceWorkers()[0];
 const extensions = context
   .serviceWorkers()
   .map((w) => new URL(w.url()).host)
   .filter(Boolean);
 
+// Point the extension at the replay server, through the popup, the way a user would.
+if (command === "setup") {
+  if (!worker) throw new Error("no extension service worker: is dist/chrome-mv3 loaded?");
+  const id = new URL(worker.url()).host;
+  const popup = await context.newPage();
+  await popup.goto(`chrome-extension://${id}/popup.html`);
+  await popup.locator("summary").click();
+  await popup.locator("#apiKey").fill("replay");
+  await popup.locator("#baseUrl").fill("http://127.0.0.1:4333");
+  await popup.locator("#baseUrl").blur();
+  await popup.waitForTimeout(500);
+  const stored = await worker.evaluate(() =>
+    chrome.storage.local.get(["baseUrl", "apiKey"]).then((v) => ({
+      baseUrl: v.baseUrl,
+      keySet: Boolean(v.apiKey),
+    })),
+  );
+  console.log(JSON.stringify({ extensionId: id, stored }, null, 2));
+  await popup.close();
+  await browser.close();
+  process.exit(0);
+}
+
 const page = await context.newPage();
-await page.goto(`https://www.youtube.com/watch?v=${videoId}`, { waitUntil: "domcontentloaded" });
-await page.waitForTimeout(6000);
+const captured = [];
+page.on("console", (m) => {
+  if (m.type() === "error") captured.push(m.text().slice(0, 120));
+});
+await page.goto(`https://www.youtube.com/watch?v=${videoId}${command === "run" ? "&jevdemo=1" : ""}`, {
+  waitUntil: "domcontentloaded",
+});
+await page.waitForTimeout(command === "run" ? 20000 : 6000);
 
 const result = await page.evaluate(async () => {
   const tracks =
@@ -46,5 +78,32 @@ const result = await page.evaluate(async () => {
   return out;
 });
 
-console.log(JSON.stringify({ command, extensions, ...result }, null, 2));
+const trace = worker
+  ? await worker
+      .evaluate(() => chrome.storage.session.get("trace").then((v) => v.trace ?? null))
+      .catch(() => null)
+  : null;
+
+console.log(
+  JSON.stringify(
+    {
+      command,
+      extensions,
+      ...result,
+      trace: trace && {
+        status: trace.status,
+        error: trace.error,
+        model: trace.model,
+        segmentCount: trace.segmentCount,
+        chunks: `${trace.chunksDone}/${trace.chunksTotal}`,
+        elapsedMs: trace.elapsedMs,
+        slices: trace.slices?.length,
+        nonContent: trace.slices?.filter((s) => s.category !== "content").length,
+      },
+      consoleErrors: captured.slice(0, 6),
+    },
+    null,
+    2,
+  ),
+);
 await browser.close();

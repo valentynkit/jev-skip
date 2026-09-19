@@ -156,9 +156,13 @@ export default defineBackground(() => {
       return true;
     }
     if (message.type === "set-settings") {
-      // Only extension pages change settings. A content script asking to move the endpoint
-      // is a content script asking where to send the key.
-      if (sender.tab) return false;
+      // Only our own extension pages change settings. A content script asking to move the
+      // endpoint is a content script asking where to send the key. Checking sender.tab is
+      // not enough: the popup opened in a tab has one, and an options page would too.
+      const fromExtensionPage =
+        sender.id === browser.runtime.id &&
+        (sender.url ?? "").startsWith(browser.runtime.getURL("/" as never));
+      if (!fromExtensionPage) return false;
       void (async () => {
         const patch: Partial<Settings> & { baseUrl?: string } = {};
         if (typeof message.patch.apiKey === "string") patch.apiKey = message.patch.apiKey;
