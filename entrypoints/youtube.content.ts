@@ -130,6 +130,23 @@ export default defineContentScript({
       window.postMessage({ source: "jev-skip-ask", type }, location.origin);
     }
 
+    /** The page answers asynchronously, so reading pageDetails straight after asking races it. */
+    function askDetails(videoId: string, timeoutMs = 2_500): Promise<VideoInfo | null> {
+      if (pageDetails?.videoId === videoId) return Promise.resolve(pageDetails);
+      return new Promise((resolve) => {
+        const done = (value: VideoInfo | null) => {
+          clearTimeout(timer);
+          clearInterval(poll);
+          resolve(value);
+        };
+        const timer = setTimeout(() => done(null), timeoutMs);
+        const poll = setInterval(() => {
+          if (pageDetails?.videoId === videoId) done(pageDetails);
+        }, 100);
+        askPage("details");
+      });
+    }
+
     /** The progress bar does not exist at document_start, and not during an ad either. */
     async function waitForProgressBar(timeoutMs = 15_000) {
       const deadline = Date.now() + timeoutMs;
@@ -159,12 +176,10 @@ export default defineContentScript({
       const cues = await fetchCues(url);
       if (!cues?.length || currentId !== videoId) return;
 
-      askPage("details");
-      const video = await waitForProgressBar();
+      const [details, video] = await Promise.all([askDetails(videoId), waitForProgressBar()]);
       if (currentId !== videoId) return;
       if (video) attach(video);
 
-      const details = pageDetails?.videoId === videoId ? pageDetails : null;
       const info: VideoInfo = {
         videoId,
         title: details?.title || document.title.replace(/ - YouTube$/, ""),

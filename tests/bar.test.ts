@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it } from "vitest";
-import { clampTip, mountBar, tipLeftPx } from "../lib/bar.ts";
+import { clampTip, mountBar, sliceColor, tipLeftPx } from "../lib/bar.ts";
 import { CATEGORY_COLOR, type Slice } from "../lib/types.ts";
 
 const slice = (over: Partial<Slice>): Slice => ({
@@ -28,8 +28,9 @@ describe("seek bar", () => {
     expect(items).toHaveLength(1);
     expect(items[0].style.left).toBe("25%");
     expect(items[0].style.right).toBe("50%");
-    expect(items[0].style.backgroundColor).toBe("rgb(255, 77, 106)");
-    expect(items[0].style.opacity).toBe("0.85");
+    // p 0.93 clamps to the 0.85 ceiling, mixed from the base toward the sponsor hue.
+    expect(items[0].style.backgroundColor).toBe(sliceColor("sponsor", 0.93));
+    expect(items[0].style.opacity).toBe("1");
     bar.destroy();
   });
 
@@ -47,8 +48,7 @@ describe("seek bar", () => {
     const items = progress.querySelectorAll("li");
     expect(items).toHaveLength(1);
     expect(items[0].dataset.category).toBe("intro");
-    expect(items[0].style.opacity).toBe("0.21");
-    expect(items[0].style.backgroundColor).toBe("rgb(169, 140, 255)");
+    expect(items[0].style.backgroundColor).toBe(sliceColor("intro", 0.21));
     expect(CATEGORY_COLOR.intro).toBe("#a98cff");
     bar.destroy();
   });
@@ -145,6 +145,19 @@ describe("seek bar, painting for the camera", () => {
     expect(Math.max(...delays)).toBeLessThanOrEqual(0.4);
     expect(delays).toStrictEqual([...delays].sort((a, b) => a - b));
     bar.destroy();
+  });
+});
+
+describe("probability as colour", () => {
+  it("keeps a faint slice near the base and a confident one near the hue", () => {
+    const faint = sliceColor("sponsor", 0.2);
+    const solid = sliceColor("sponsor", 0.95);
+    // The base is rgb(36, 40, 51); the sponsor hue is #ff4d6a.
+    expect(faint).toBe("rgb(80, 47, 62)");
+    expect(solid).toBe("rgb(222, 71, 98)");
+    // Below the floor and above the ceiling both clamp, so nothing is invisible or pure hue.
+    expect(sliceColor("sponsor", 0)).toBe(faint);
+    expect(sliceColor("sponsor", 1)).toBe(solid);
   });
 });
 

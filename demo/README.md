@@ -1,8 +1,13 @@
 # The demo clip
 
-`demo.mp4` (2.6MB, for X) and `demo.gif` (4.6MB, for the README) are one continuous 8.6
-second take on Corridor Crew's "VFX Artists React to BOLLYWOOD Bad & Great CGi 8", recorded
-2026-09-19 in Chrome 153.
+`demo.mp4` (2.5MB, 1280x504, for X) and `demo.gif` (3.9MB, 720px, for the README) are one
+continuous 9 second take on Corridor Crew's "VFX Artists React to BOLLYWOOD Bad & Great CGi
+8", recorded 2026-09-19 in Chrome 153.
+
+The frame is two real surfaces side by side: the watch page on the left, the extension's
+own popup on the right, filmed at the same moment and resampled onto one timeline. The
+popup carries the shot, because a 6px seek bar is unreadable on a phone and the popup's
+mini timeline is not.
 
 ## What the take shows, and what it is
 
@@ -25,12 +30,18 @@ SponsorBlock-labeled, which is how it was scored. That claim needs a key and a f
 
 Timeline of the take:
 
-    0.0s  page loads, bar empty
+    0.0s  page loads, bar empty, popup idle
     ~2s   10 slices fade in, staggered: 6 confident, 4 faint
+          popup: 50 segments · 25.3k est. tokens · $0.0011 · done in 1546 ms · 50 judged
+          and the legend fills in: content 40, sponsor 5, intro 2, outro 2, self_promo 1
     ~3s   the playhead reaches the sponsor and the video jumps 0:03 to 0:41
           toast: skipped 38s of sponsor (0.88) · undo
     ~6s   the pointer rests on a faint slice at 24:45
           tooltip: outro 43% · the transcript line behind it
+
+The token count and the cost are the ones the recorded call actually billed, not an
+estimate: 25.3k input tokens on a 25 minute video, against the 18.1k mean the README
+publishes.
 
 Stills pulled from the same take: `still-before.jpg` (bar empty, video playing),
 `still-toast.jpg` (the skip landing), `still-tooltip.jpg` (doubt, with its reason).
@@ -59,17 +70,32 @@ before the recording window closes. Run it again.
 
 ## Encoding
 
-    ffmpeg -y -framerate 37.69 -i demo/raw/frame-%05d.jpg -vcodec libx264 -pix_fmt yuv420p -crf 20 -an demo/demo.mp4
-    ffmpeg -y -i demo/demo.mp4 -vf "fps=13,scale=720:-1:flags=lanczos,split[s0][s1];[s0]palettegen=max_colors=192[p];[s1][p]paletteuse=dither=bayer:bayer_scale=3" -loop 0 demo/demo.gif
+    cd demo
+    ffmpeg -y -framerate 38.16 -i raw/frame-%05d.jpg -framerate 38.16 -i raw-popup/frame-%05d.jpg \
+      -filter_complex "[0:v]crop=992:560:16:68[p];[1:v]crop=340:440:0:0,scale=-2:560[q];[p][q]hstack=inputs=2,scale=1280:-2[v]" \
+      -map "[v]" -vcodec libx264 -pix_fmt yuv420p -crf 20 -an demo.mp4
+    ffmpeg -y -i demo.mp4 -vf "fps=11,scale=720:-1:flags=lanczos,split[s0][s1];[s0]palettegen=max_colors=160[p];[s1][p]paletteuse=dither=bayer:bayer_scale=4" -loop 0 demo.gif
+
+The crop numbers come from the live page at a 1440x900 viewport: player at 16,68 sized
+989x556, progress bar at 28,562 sized 965x6. Measure again if the viewport changes.
 
 Use the framerate `record-demo.mjs` prints; the screencast does not run at a fixed rate.
-Keep the GIF under 5MB: 720px at 13fps lands at 4.6MB. `demo/raw/` is gitignored, 58MB of
-jpegs.
+Keep the GIF under 5MB: 720px at 11fps lands at 3.9MB. `demo/raw/` and `demo/raw-popup/`
+are gitignored.
 
 ## What the camera found
 
-Two bugs, both fixed, both visible in the first take: the tooltip wrapped into an unreadable
-column at the right edge of the bar, and the toast was positioned against the window rather
-than the player, so it landed over the page next to the Download button. The tooltip also
-lived inside the progress bar's stacking context, where YouTube's own seek preview covered
-it; it hangs off the player now.
+Five bugs, all fixed, none of which any test would have caught:
+
+- The tooltip wrapped into a column three words wide at the right edge of the bar.
+- The tooltip sat inside the progress bar's stacking context, where YouTube's own seek
+  preview covered it. It hangs off the player now.
+- The toast was positioned against the window rather than the player, so it landed over the
+  page next to the Download button.
+- Probability was drawn as transparency, which let the video through: the heatmap read as
+  noise on a bright scene and vanished on a dark one. It is colour strength against a fixed
+  base now, so a faint slice looks the same over any frame.
+- The popup asked the page for the title and channel and then read the answer before it
+  arrived, so the channel line stayed on its placeholder.
+
+Trying to film something is a different kind of test than running it.

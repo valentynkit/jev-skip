@@ -1,4 +1,4 @@
-import { CATEGORY_COLOR, PAINTED, formatTime, type Slice } from "./types.ts";
+import { CATEGORY_COLOR, PAINTED, formatTime, type Category, type Slice } from "./types.ts";
 
 /** Below this a slice is noise, and painting content would tint the whole bar. */
 export const PAINT_FLOOR = 0.2;
@@ -14,6 +14,28 @@ export const BAR_Z = 42;
 
 /** A batch fades in over this long, end to end. Long enough to read, short enough to miss. */
 export const PAINT_IN_MS = 400;
+
+/** What a slice is drawn on top of: YouTube's own bar, which is translucent over video. */
+const BASE_RGB = [36, 40, 51] as const;
+
+const hexRgb = (hex: string): [number, number, number] => [
+  Number.parseInt(hex.slice(1, 3), 16),
+  Number.parseInt(hex.slice(3, 5), 16),
+  Number.parseInt(hex.slice(5, 7), 16),
+];
+
+/**
+ * Probability as colour strength against a fixed base, rather than as transparency over
+ * whatever frame is playing. Opacity let the video through, so the heatmap read as noise
+ * on a bright scene and vanished on a dark one; this keeps a faint slice faint and a
+ * confident one solid no matter what is behind it.
+ */
+export function sliceColor(category: Category, p: number): string {
+  const strength = Math.min(MAX_OPACITY, Math.max(PAINT_FLOOR, p));
+  const [r, g, b] = hexRgb(CATEGORY_COLOR[category]);
+  const mix = (base: number, target: number) => Math.round(base + (target - base) * strength);
+  return `rgb(${mix(BASE_RGB[0], r)}, ${mix(BASE_RGB[1], g)}, ${mix(BASE_RGB[2], b)})`;
+}
 
 export function paintable(slice: Slice, floor = PAINT_FLOOR): boolean {
   return PAINTED.includes(slice.category) && slice.p >= floor;
@@ -53,7 +75,8 @@ export function tipLeftPx(slice: DOMRect, host: DOMRect, tipWidth: number): numb
 /**
  * Slices are absolutely positioned <li> in a container over .ytp-progress-bar, the
  * mechanics SponsorBlock uses (src/js-components/previewBar.ts:409-443). The semantics are
- * ours: one hue per category, opacity from probability, so a borderline sponsor is a ghost.
+ * ours: one hue per category, colour strength from probability, so a borderline sponsor is
+ * a ghost and a confident one is solid.
  */
 export interface BarOptions {
   /** Budget for a whole batch to fade in. The eye reads the bar filling; the clock doesn't. */
@@ -110,7 +133,7 @@ export function mountBar(progressBar: HTMLElement, options: BarOptions = {}): Ba
         const li = existing ?? doc.createElement("li");
         li.dataset.category = slice.category;
         li.dataset.p = slice.p.toFixed(2);
-        const opacity = String(Math.min(MAX_OPACITY, Math.max(PAINT_FLOOR, slice.p)));
+        const colour = sliceColor(slice.category, slice.p);
         if (!existing) {
           li.style.cssText =
             `position:absolute;top:0;bottom:0;pointer-events:auto;opacity:0;` +
@@ -121,7 +144,7 @@ export function mountBar(progressBar: HTMLElement, options: BarOptions = {}): Ba
         }
         li.style.left = pct(slice.start / duration);
         li.style.right = pct(1 - Math.min(slice.end, duration) / duration);
-        li.style.backgroundColor = CATEGORY_COLOR[slice.category];
+        li.style.backgroundColor = colour;
         // The v0.2 "why" tooltip, pulled forward: the text behind the slice is the whole
         // argument for trusting a probability nobody voted on.
         li.onmouseenter = () => {
@@ -141,7 +164,7 @@ export function mountBar(progressBar: HTMLElement, options: BarOptions = {}): Ba
           // somewhere to run from. Without it the browser collapses both values into one.
           void li.offsetWidth;
         }
-        li.style.opacity = opacity;
+        li.style.opacity = "1";
       }
     },
     destroy() {

@@ -21,6 +21,8 @@ const port = Number(portIndex === -1 ? 4333 : args[portIndex + 1]);
 const recorded = new Map();
 /** videoId -> how long the recorded call actually took, so a replay is not unrealistically fast. */
 const recordedLatency = new Map();
+/** videoId -> the input tokens the recorded call actually billed, so the cost on screen is real. */
+const recordedTokens = new Map();
 for (const file of readdirSync("fixtures/answers")) {
   const payload = JSON.parse(readFileSync(join("fixtures/answers", file), "utf8"));
   if (!payload.videoId) continue;
@@ -30,6 +32,10 @@ for (const file of readdirSync("fixtures/answers")) {
   recordedLatency.set(
     payload.videoId,
     Math.max(recordedLatency.get(payload.videoId) ?? 0, payload.elapsedMs ?? 0),
+  );
+  recordedTokens.set(
+    payload.videoId,
+    (recordedTokens.get(payload.videoId) ?? 0) + (payload.usage?.input_tokens ?? 0),
   );
 }
 
@@ -125,7 +131,11 @@ createServer((req, res) => {
         model: "typesafe-ai/jev (recorded 2026-09-18, replayed)",
         answers: out,
         usage: {
-          input_tokens: segments.reduce((sum, s) => sum + Math.ceil(s.text.length / 4), 0),
+          // The tokens the recorded call actually billed, so the popup's cost is the
+          // measured one rather than a guess made from string lengths.
+          input_tokens:
+            recordedTokens.get(video?.videoId) ??
+            segments.reduce((sum, s) => sum + Math.ceil(s.text.length / 4), 0),
           output_tokens: 0,
         },
       }),

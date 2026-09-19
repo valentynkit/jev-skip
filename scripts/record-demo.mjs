@@ -18,12 +18,13 @@ const flag = (name, fallback) => {
 };
 const videoId = argv.find((a) => !a.startsWith("--") && argv[argv.indexOf(a) - 1] !== "--port" && argv[argv.indexOf(a) - 1] !== "--out") ?? "4RcThoRG46c";
 const port = flag("port", "9223");
+const EXTENSION_ID = flag("id", "edfecaedojdjlgodaajjmiapcojdmhjj");
 const out = flag("out", "demo/raw");
 
 const browser = await chromium.connectOverCDP(`http://127.0.0.1:${port}`);
 const context = browser.contexts()[0];
 const page = await context.newPage();
-await page.setViewportSize({ width: 1280, height: 720 });
+await page.setViewportSize({ width: 1440, height: 900 });
 await page.goto("about:blank");
 
 await rm(out, { recursive: true, force: true });
@@ -36,20 +37,44 @@ cdp.on("Page.screencastFrame", async ({ data, sessionId, metadata }) => {
   await cdp.send("Page.screencastFrameAck", { sessionId }).catch(() => {});
 });
 
+// The popup is the other half of the shot: it shows the request going out, the token
+// count, the cost and the same answers landing on its own timeline.
+const popup = await context.newPage();
+await popup.setViewportSize({ width: 340, height: 620 });
+await popup.goto(`chrome-extension://${EXTENSION_ID}/popup.html`);
+const popupCdp = await context.newCDPSession(popup);
+const popupFrames = [];
+popupCdp.on("Page.screencastFrame", async ({ data, sessionId, metadata }) => {
+  popupFrames.push({ data, timestamp: metadata.timestamp });
+  await popupCdp.send("Page.screencastFrameAck", { sessionId }).catch(() => {});
+});
+
 // YouTube fades its controls out after a couple of seconds and the bar lives inside them,
 // so the take keeps the pointer alive over the player the whole way through.
 let jiggling = true;
 const jiggle = (async () => {
   let n = 0;
   while (jiggling) {
-    await page.mouse.move(600 + (n % 3) * 12, 300 + (n % 2) * 10).catch(() => {});
+    // Kept high over the video: near the bar it summons YouTube's seek preview.
+    await page.mouse.move(700 + (n % 3) * 10, 260 + (n % 2) * 8).catch(() => {});
     n += 1;
     await new Promise((r) => setTimeout(r, 700));
   }
 })();
 
 // Filming starts before the page does, so the bar filling happens on camera.
-await cdp.send("Page.startScreencast", { format: "jpeg", quality: 90, everyNthFrame: 1 });
+// Theater mode first, off camera: the player fills the width and the seek bar with it,
+// which is the difference between a readable heatmap and a 4px smear on a phone.
+await page.goto(`https://www.youtube.com/watch?v=${videoId}`, { waitUntil: "domcontentloaded" });
+await page.waitForSelector(".ytp-progress-bar", { state: "attached", timeout: 30000 });
+await page.waitForTimeout(2500);
+await page.mouse.move(700, 300);
+await page.keyboard.press("t").catch(() => {});
+await page.waitForTimeout(1500);
+await page.evaluate(() => window.scrollTo(0, 0));
+
+await popupCdp.send("Page.startScreencast", { format: "jpeg", quality: 92, everyNthFrame: 1 });
+await cdp.send("Page.startScreencast", { format: "jpeg", quality: 92, everyNthFrame: 1 });
 await page.goto(`https://www.youtube.com/watch?v=${videoId}&jevdemo=1`, { waitUntil: "domcontentloaded" });
 
 // The skip fires on its own a few seconds in; nothing here seeks or stages it.
@@ -91,12 +116,27 @@ if (boxes.length) {
 }
 
 await cdp.send("Page.stopScreencast").catch(() => {});
+await popupCdp.send("Page.stopScreencast").catch(() => {});
 
 let index = 0;
 const firstTs = frames[0]?.timestamp ?? 0;
 for (const frame of frames) {
   await writeFile(`${out}/frame-${String(index).padStart(5, "0")}.jpg`, Buffer.from(frame.data, "base64"));
   index += 1;
+}
+
+// The popup updates far less often than the page, so its frames are resampled onto the
+// page's timeline: whichever popup frame was current when the page frame was taken.
+await rm(`${out}-popup`, { recursive: true, force: true });
+await mkdir(`${out}-popup`, { recursive: true });
+let cursor = 0;
+for (let i = 0; i < frames.length; i++) {
+  while (cursor + 1 < popupFrames.length && popupFrames[cursor + 1].timestamp <= frames[i].timestamp) {
+    cursor += 1;
+  }
+  const pick = popupFrames[cursor];
+  if (!pick) break;
+  await writeFile(`${out}-popup/frame-${String(i).padStart(5, "0")}.jpg`, Buffer.from(pick.data, "base64"));
 }
 const seconds = (frames[frames.length - 1]?.timestamp ?? firstTs) - firstTs;
 const fps = seconds > 0 ? frames.length / seconds : 15;
@@ -111,6 +151,7 @@ console.log(
       tooltip,
       faintSlices: boxes.length,
       frames: frames.length,
+      popupFrames: popupFrames.length,
       seconds: Number(seconds.toFixed(1)),
       fps: Number(fps.toFixed(2)),
       out,
@@ -121,4 +162,5 @@ console.log(
 );
 
 await page.close().catch(() => {});
+await popup.close().catch(() => {});
 process.exit(0);

@@ -8,3 +8,5 @@ measure-nomarkers.json
 
 # Screencast frames: 370MB of jpegs that demo.mp4 and demo.gif are made from.
 demo/raw/
+
+demo/raw-popup/
