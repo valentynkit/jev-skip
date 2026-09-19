@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it } from "vitest";
-import { mountBar } from "../lib/bar.ts";
+import { clampTip, mountBar, sliceColor, tipLeftPx } from "../lib/bar.ts";
 import { CATEGORY_COLOR, type Slice } from "../lib/types.ts";
 
 const slice = (over: Partial<Slice>): Slice => ({
@@ -28,8 +28,9 @@ describe("seek bar", () => {
     expect(items).toHaveLength(1);
     expect(items[0].style.left).toBe("25%");
     expect(items[0].style.right).toBe("50%");
-    expect(items[0].style.backgroundColor).toBe("rgb(255, 77, 106)");
-    expect(items[0].style.opacity).toBe("0.85");
+    // p 0.93 clamps to the 0.85 ceiling, mixed from the base toward the sponsor hue.
+    expect(items[0].style.backgroundColor).toBe(sliceColor("sponsor", 0.93));
+    expect(items[0].style.opacity).toBe("1");
     bar.destroy();
   });
 
@@ -47,8 +48,7 @@ describe("seek bar", () => {
     const items = progress.querySelectorAll("li");
     expect(items).toHaveLength(1);
     expect(items[0].dataset.category).toBe("intro");
-    expect(items[0].style.opacity).toBe("0.21");
-    expect(items[0].style.backgroundColor).toBe("rgb(169, 140, 255)");
+    expect(items[0].style.backgroundColor).toBe(sliceColor("intro", 0.21));
     expect(CATEGORY_COLOR.intro).toBe("#a98cff");
     bar.destroy();
   });
@@ -77,10 +77,110 @@ describe("seek bar", () => {
     expect(progress.childElementCount).toBe(0);
   });
 
+  it("stacks above YouTube's timed markers and below its scrubber", () => {
+    const bar = mountBar(progress);
+    const z = Number((progress.querySelector(".jev-skip-bar") as HTMLElement).style.zIndex);
+    // Measured layers on a real watch page: markers 40, scrubber 43.
+    expect(z).toBeGreaterThan(40);
+    expect(z).toBeLessThan(43);
+    bar.destroy();
+  });
+
   it("paints nothing when the duration is not known yet", () => {
     const bar = mountBar(progress);
     bar.update([slice({})], 0);
     expect(progress.querySelectorAll("li")).toHaveLength(0);
     bar.destroy();
+  });
+});
+
+describe("seek bar, after the review", () => {
+  it("hides a tooltip whose slice is about to be rebuilt", () => {
+    const bar = mountBar(progress);
+    bar.update([slice({ start: 30, end: 60 })], 120);
+    const tip = progress.querySelector(".jev-skip-tip") as HTMLElement;
+    progress.querySelector("li")!.dispatchEvent(new MouseEvent("mouseenter"));
+    expect(tip.style.display).toBe("block");
+    // Answers arrive in batches, so update() runs many times per video.
+    bar.update([slice({ start: 30, end: 60 }), slice({ id: "s002", start: 90, end: 120 })], 120);
+    expect(tip.style.display).toBe("none");
+    bar.destroy();
+  });
+
+  it("paints nothing on a live stream, where duration is Infinity", () => {
+    const bar = mountBar(progress);
+    bar.update([slice({})], Infinity);
+    expect(progress.querySelectorAll("li")).toHaveLength(0);
+    bar.destroy();
+  });
+});
+
+describe("seek bar, painting for the camera", () => {
+  it("keeps the node for a slice it already painted and animates only the new one", () => {
+    const bar = mountBar(progress);
+    bar.update([slice({ id: "s001", start: 30, end: 60 })], 300);
+    const first = progress.querySelector("li")!;
+    bar.update(
+      [slice({ id: "s001", start: 30, end: 60 }), slice({ id: "s002", start: 90, end: 120 })],
+      300,
+    );
+    const items = progress.querySelectorAll("li");
+    expect(items).toHaveLength(2);
+    expect(items[0]).toBe(first);
+    expect(items[0].dataset.batch).toBe("1");
+    expect(items[1].dataset.batch).toBe("2");
+    bar.destroy();
+  });
+
+  it("staggers a batch inside the paint-in budget", () => {
+    const bar = mountBar(progress, { paintInMs: 400 });
+    bar.update(
+      Array.from({ length: 8 }, (_, i) => slice({ id: `s${i}`, start: i * 30, end: i * 30 + 30 })),
+      300,
+    );
+    const delays = [...progress.querySelectorAll("li")].map((li) =>
+      Number.parseFloat((li as HTMLElement).style.transitionDelay),
+    );
+    expect(delays[0]).toBe(0);
+    expect(Math.max(...delays)).toBeLessThanOrEqual(0.4);
+    expect(delays).toStrictEqual([...delays].sort((a, b) => a - b));
+    bar.destroy();
+  });
+});
+
+describe("probability as colour", () => {
+  it("keeps a faint slice near the base and a confident one near the hue", () => {
+    const faint = sliceColor("sponsor", 0.2);
+    const solid = sliceColor("sponsor", 0.95);
+    // The base is rgb(36, 40, 51); the sponsor hue is #ff4d6a.
+    expect(faint).toBe("rgb(80, 47, 62)");
+    expect(solid).toBe("rgb(222, 71, 98)");
+    // Below the floor and above the ceiling both clamp, so nothing is invisible or pure hue.
+    expect(sliceColor("sponsor", 0)).toBe(faint);
+    expect(sliceColor("sponsor", 1)).toBe(solid);
+  });
+});
+
+describe("the why tooltip near the ends of the bar", () => {
+  it("keeps the tooltip on the bar at either edge", () => {
+    const bar = mountBar(progress);
+    const list = progress.querySelector(".jev-skip-bar") as HTMLElement;
+    const tip = document.querySelector(".jev-skip-tip") as HTMLElement;
+    // jsdom has no layout, so the two widths come from stubs.
+    list.getBoundingClientRect = () => ({ width: 1000 }) as DOMRect;
+    tip.getBoundingClientRect = () => ({ width: 280 }) as DOMRect;
+    // 280px of tooltip on a 1000px bar needs 14% of clearance on each side.
+    expect(clampTip(0, list, tip)).toBe("14.00%");
+    expect(clampTip(100, list, tip)).toBe("86.00%");
+    expect(clampTip(50, list, tip)).toBe("50.00%");
+    bar.destroy();
+  });
+
+  it("keeps the tooltip inside the player at either end", () => {
+    const host = { left: 0, width: 1000 } as DOMRect;
+    // A slice at the far left would centre the 280px tooltip at 10px and hang off.
+    expect(tipLeftPx({ left: 0, width: 20 } as DOMRect, host, 280)).toBe(140);
+    expect(tipLeftPx({ left: 980, width: 20 } as DOMRect, host, 280)).toBe(860);
+    expect(tipLeftPx({ left: 480, width: 40 } as DOMRect, host, 280)).toBe(500);
   });
 });

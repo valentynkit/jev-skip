@@ -2,6 +2,40 @@
 
 All notable changes to this project are documented here, following Keep a Changelog.
 
+## Unreleased
+
+### Fixed
+- Captions could never be read at all: a timedtext URL without a proof-of-origin token is
+  answered with 200 and an empty body. A page-world hook keeps the URL the player signs for
+  itself and re-asks for it as json3. Installed as a MAIN-world content script on Chrome,
+  because injecting a `<script src>` lost the race against the player about a third of the
+  time. Measured after the change: 29 of 30 cold loads paint, median 2.9s.
+- Seeking back into a skipped segment re-skipped it instantly, so undo did nothing.
+- A throttled background-tab timer could seek the playhead backwards by minutes.
+- Skips could fire against an ad's clock, cutting the ad instead of the sponsor.
+- A trace from another tab could arm a skip against the video you were watching.
+- The heatmap was painted under YouTube's own progress layers at `z-index: 1`, where the
+  markers container also swallowed every hover, so the tooltip never opened.
+- Probability was drawn as transparency, which let the video through; it is colour strength
+  against a fixed base now.
+- The tooltip wrapped into an unreadable column at the ends of the bar, and sat behind
+  YouTube's seek preview.
+- The toast was positioned against the window rather than the player.
+- 'z' undid a skip while typing a comment, and Cmd-Z did too.
+- A settings message from a content script could point the endpoint, and the key, anywhere.
+- The false-skip figure scored two of the five categories the extension skips: 27.2s/h
+  becomes 34.0s/h. The Brier score used one minus the top choice as the sponsor
+  probability: 0.117 becomes 0.105.
+- The corpus walk covered a sixteenth of the hash space it documents.
+
+### Added
+- `demo/demo.mp4` and `demo/demo.gif`: one take of the bar filling, the skip firing and the
+  popup showing the request, with the answers replayed from the recorded fixtures.
+- Harnesses that drive a real browser over CDP: `scripts/record-demo.mjs`,
+  `scripts/reliability.mjs`, `scripts/cdp.mjs`, `scripts/answer-server.mjs`, and the
+  diagnostics behind the caption finding.
+- `docs/browser-ground-truth.md` and `docs/review-01.md`.
+
 ## [0.1.0] - 2026-09-18
 
 ### Added

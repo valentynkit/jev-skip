@@ -75,7 +75,9 @@ async function meta(videoId: string): Promise<{ title: string; channel: string }
 
 /** Ascending hash prefixes, so the sample is the database's order and not ours. */
 async function* seed(): AsyncGenerator<{ videoId: string; duration: number }> {
-  for (let n = 0; n < 4096; n++) {
+  // A 4-hex prefix is 16^4 values. Stopping at 4096 walked a sixteenth of the space and
+  // would have quietly returned a short corpus if that slice ever thinned out.
+  for (let n = 0; n < 65536; n++) {
     const prefix = n.toString(16).padStart(4, "0");
     let rows: { videoID: string; segments: { videoDuration: number; locked: number; votes: number; category: string }[] }[];
     try {

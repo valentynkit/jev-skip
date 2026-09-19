@@ -87,9 +87,45 @@ export function dedupeRollingCues(cues: Cue[]): Cue[] {
 }
 
 /**
- * The timedtext URL is session-signed, so this only works from the watch tab. An empty
- * body means nothing to read: no bar, no request, and we cannot tell a caption-less video
- * apart from a session YouTube refused.
+ * A timedtext URL is only answered when it carries the proof-of-origin token the player
+ * mints in the page world; without it YouTube returns 200 and an empty body, which is what
+ * the baseUrl from the player response gets. Measured 2026-09-19, see
+ * docs/browser-ground-truth.md. So we take the URL the player itself signed and re-ask for
+ * json3.
+ */
+export function toJson3(url: string): string {
+  return /[?&]fmt=/.test(url) ? url.replace(/([?&])fmt=[^&]*/, "$1fmt=json3") : `${url}&fmt=json3`;
+}
+
+/** Which video a captured caption URL belongs to, so one tab's URL never feeds another. */
+export function captionUrlVideoId(url: string): string | null {
+  try {
+    return new URL(url, "https://www.youtube.com").searchParams.get("v");
+  } catch {
+    return null;
+  }
+}
+
+/** Reads a caption track from a URL the player already signed. */
+export async function fetchCues(
+  url: string,
+  fetchImpl: typeof fetch = fetch,
+): Promise<Cue[] | null> {
+  let body: string;
+  try {
+    const res = await fetchImpl(toJson3(url));
+    if (!res.ok) return null;
+    body = await res.text();
+  } catch {
+    return null;
+  }
+  const cues = parseJson3(body);
+  return cues ? dedupeRollingCues(cues) : null;
+}
+
+/**
+ * The old path, kept for the fallback: the baseUrl out of the player response. It comes
+ * back empty in every session measured so far.
  */
 export async function readCaptions(
   player: PlayerResponse | null | undefined,

@@ -6,25 +6,39 @@ the "Lab rules" section below for the monorepo rules, then `CONTEXT.md` here in 
 
 Verdict after three review rounds: **ready to build**.
 
-## Build state (2026-09-18, first build session)
+## Build state (2026-09-19, after the review session)
 
-Tasks 1 to 10 coded. `npm test` 36 tests in 7 files, all passing, offline. Both builds
-emit (`dist/chrome-mv3/`, `dist/firefox-mv2/`) and both zips exist. The content bundle
-contains no `apiKey` or `Bearer`. Loading unpacked in a browser has NOT been done; nothing
-has been watched on a real YouTube page yet. No second-pair review; that is
-`sessions/01-review.md`.
+Tasks 1 to 10 coded, reviewed, fixed, and filmed. `npm test` 52 tests in 7 files, all
+passing, offline. Both builds emit and the content bundles contain no `apiKey` or `Bearer`.
+
+The pipeline now runs end to end in Google Chrome 153 on a live watch page: the extension
+reads the caption track itself, segments it, asks, paints, and skips. Getting there meant
+finding out why it never could before: a timedtext URL without a proof-of-origin token is
+answered with 200 and an empty body, so the extension takes the URL the player signs for
+itself (`lib/page-hook.ts`, installed as a MAIN-world content script).
+
+Reliability, measured: 29 of 30 cold loads paint, median 2.9s to the first slice
+(`scripts/reliability.mjs`). Before the hook moved out of an async `<script src>` and into
+a MAIN-world script it was roughly two in three.
+
+Read `docs/browser-ground-truth.md` before trusting anything about runtime behaviour, and
+`docs/review-01.md` for what the five reviewers found, what was fixed, what was rejected,
+and what is deferred. The demo clip and how it was shot are in `demo/README.md`.
+
+Two published numbers moved in that session: false-skip 27.2 to 34.0 s/h (it was only
+counting two of the five categories the extension actually skips) and Brier 0.117 to 0.105.
 
 This is the one project with real numbers. `npm run measure`, offline over recorded
 fixtures, prints:
 
 ```
 77.0% of crowd-labeled sponsor seconds caught (n=23 videos / 1,820 labeled seconds, recorded fixtures, typesafe-ai/jev)
-27.2s false-skip per hour, upper bound (n=22 dense-subset videos)
+34.0s false-skip per hour, upper bound (n=22 dense-subset videos)
 $0.0008 per video (n=23, mean 18.1k input tokens)
 0.9s p50 to first painted segment (n=23, single request)
 ```
 
-Brier 0.117, IoU 0.666, sweep in `measure.json`. The `has_promo_markers` arm was answered
+Brier 0.105, IoU 0.666, sweep in `measure.json`. The `has_promo_markers` arm was answered
 with data on the 12 videos both arms cover: 79.0% recall with the belt versus 73.4%
 without, at the same false-skip rate. Main arm recorded 27 of 27 chunks; the `--no-markers`
 arm 12 of 27 (gateway rate limit), resumable at zero cost for what exists. All of it came
@@ -45,22 +59,28 @@ Three `ponytail:` markers: the watch page is re-fetched and scraped for the play
 (`entrypoints/youtube.content.ts:69`); one skip threshold for all five categories
 (`lib/schedule.ts:39`); the fake's keyword heuristic (`scripts/fake-jev.ts:5`).
 
-Blocked on: the remaining 15 no-markers chunks (gateway credits), a manual load in Chrome
-and Firefox, and a direct-API re-measure when a TypeSafe key exists.
+Blocked on a key, and only on a key. The gateway shim now answers "Free tier requests on
+this model are rate-limited"; Vercel's minimum top-up is $20 and was declined, so there are
+no live answers until a TypeSafe key exists. That blocks the remaining 15 no-markers
+chunks, the direct-API re-measure, the segmentation fixes in `docs/review-01.md` (changing
+segmentation rehashes every request and orphans all 27 recorded answer files), and any demo
+clip that shows a live call rather than a replay.
+
+Chrome is the only browser this has run in. Firefox MV2 builds and is untested; Arc drops
+the extension's storage writes, so the key cannot be saved there.
 
 ## Next sessions
 
-`sessions/01-review.md` (brutal review, a real browser, fixes, README, hygiene, store
-listing) then `sessions/02-demo.md` (the screen recording of the bar filling and a skip
-firing, the X thread). Each in its own session.
+Sessions 01 (review) and 02 (demo) are both done; their prompts stay in `sessions/` as the
+record of what was asked for. What is left needs things this machine does not have:
 
-Review targets: the extension has never run on a real watch page (player-response scrape,
-SPA navigation, the `.ytp-progress-bar` container, ads shifting `currentTime`, live
-streams, Shorts, embedded players, playlists); the popup's live trace across
-`storage.session` on Firefox MV2; key isolation under a compromised content script; the
-skip timer versus YouTube's own ad skips and chapter seeks; the 45 s cap and sentence
-snapping on auto-captions with no punctuation; token estimate versus real usage; the
-selection rule's reproducibility from a clean machine.
+- A TypeSafe key: the direct-API re-measure, pinning `jev-1.13.0`, the remaining 15
+  no-markers chunks, the deferred segmentation fixes, and a clip that shows a live call on
+  a video the crowd has never labeled.
+- A Firefox install: the MV2 build has never been loaded anywhere.
+- Launch copy: the X thread, the Show HN title, the r/SponsorBlock and r/youtube posts, and
+  the awesome-list line. `docs/research/00a-virality-recipe.md` and `docs/research/04`
+  section 1 hold the shape; `demo/README.md` holds what the clip may and may not claim.
 
 Project-specific rules:
 - WXT + TypeScript, MV3, Chrome and Firefox from one build.

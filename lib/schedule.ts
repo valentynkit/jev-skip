@@ -13,6 +13,8 @@ export interface SchedulerOptions {
   threshold: number;
   autoSkip: boolean;
   leadMs?: number;
+  /** YouTube runs ads through the same video element, on the ad's own clock. */
+  adPlaying?: () => boolean;
   onSkip?: (slice: Slice) => void;
 }
 
@@ -35,6 +37,8 @@ export function createScheduler(video: VideoLike, options: SchedulerOptions): Sc
   let slices: Slice[] = [];
   let timer: ReturnType<typeof setTimeout> | null = null;
   let armedFor: number | null = null;
+  /** Segments this scheduler already skipped once. Going back in is a decision, not a miss. */
+  const fired = new Set<string>();
 
   // ponytail: one threshold for all five skippable categories. Per-category thresholds wait
   // for the sweep in measure.json to show the categories actually separate.
@@ -49,6 +53,13 @@ export function createScheduler(video: VideoLike, options: SchedulerOptions): Sc
 
   function fire(slice: Slice) {
     clear();
+    // Background tabs get their timers throttled while playback keeps running, so a timer
+    // can land long after the segment is behind us. Seeking to its end would rewind.
+    if (video.currentTime >= slice.end) {
+      arm();
+      return;
+    }
+    fired.add(slice.id);
     video.currentTime = slice.end;
     opts.onSkip?.(slice);
     arm();
@@ -56,10 +67,11 @@ export function createScheduler(video: VideoLike, options: SchedulerOptions): Sc
 
   function arm() {
     clear();
-    if (!opts.autoSkip || video.paused) return;
+    // During an ad currentTime is the ad's, so any content timestamp looks overdue.
+    if (!opts.autoSkip || video.paused || opts.adPlaying?.()) return;
     const now = video.currentTime;
     const next = slices
-      .filter((s) => skippable(s) && s.end > now + 0.25)
+      .filter((s) => skippable(s) && s.end > now + 0.25 && !fired.has(s.id))
       .sort((a, b) => a.start - b.start)[0];
     if (!next) return;
     if (next.start <= now) {

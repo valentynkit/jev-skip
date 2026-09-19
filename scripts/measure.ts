@@ -9,7 +9,7 @@
  * counts seconds we would skip that fall in no crowd segment at all, over the dense subset.
  */
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { USD_PER_INPUT_TOKEN, type Category } from "../lib/types.ts";
+import { PAINTED, USD_PER_INPUT_TOKEN, type Category } from "../lib/types.ts";
 import { answersDir, cacheKey, corpusRequests, type CorpusVideo } from "./record.ts";
 
 type Interval = [number, number];
@@ -56,7 +56,16 @@ const median = (values: number[]) => {
 interface Prediction {
   category: Category;
   p: number;
+  /** The whole distribution, because the sponsor mass is not 1 minus the top choice. */
+  probabilities?: Partial<Record<Category, number>>;
 }
+
+/** What the model thinks is sponsor-ish, read off the distribution rather than inferred. */
+const sponsorMass = (prediction: Prediction): number => {
+  const dist = prediction.probabilities;
+  if (!dist) return SPONSORISH.includes(prediction.category) ? prediction.p : 1 - prediction.p;
+  return SPONSORISH.reduce((sum, category) => sum + (dist[category] ?? 0), 0);
+};
 interface AnswerFile {
   model?: string;
   usage?: { input_tokens?: number | null };
@@ -74,6 +83,8 @@ interface Row {
   crowdSponsorSeconds: number;
   caughtSeconds: number;
   skipSeconds: number;
+  /** Seconds the extension would actually cut, across all five painted categories. */
+  skippedSeconds: number;
   falseSkipSeconds: number;
   unionSeconds: number;
   intersectionSeconds: number;
@@ -118,6 +129,7 @@ function predictionsFor(
       byId.set(id, {
         category: answer.choice as Category,
         p: answer.probabilities?.[answer.choice] ?? answer.confidence ?? 0,
+        probabilities: answer.probabilities as Partial<Record<Category, number>> | undefined,
       });
     }
   }
@@ -160,6 +172,9 @@ function score(act: number, override: Parameters<typeof predictionsFor>[1]) {
       .map((c) => [c.startTime, c.endTime]);
 
     const predicted: Interval[] = [];
+    // What the extension would actually cut: lib/schedule.ts skips every painted category
+    // at one threshold, not just the sponsor-ish pair the recall number is scored on.
+    const skipped: Interval[] = [];
     const segmentScores: Row["segments"] = [];
     segments.forEach((segment, i) => {
       const answer = prediction.byId.get(segment.id);
@@ -167,8 +182,9 @@ function score(act: number, override: Parameters<typeof predictionsFor>[1]) {
       const span = bounds[i];
       const sponsorish = SPONSORISH.includes(answer.category);
       if (sponsorish && answer.p >= act) predicted.push(span);
+      if (PAINTED.includes(answer.category) && answer.p >= act) skipped.push(span);
       segmentScores.push({
-        p: sponsorish ? answer.p : 1 - answer.p,
+        p: sponsorMass(answer),
         sponsorish,
         labelled: total(intersect([span], crowdAll)) > 0,
         crowdSponsorish: total(intersect([span], crowdSponsor)) > (span[1] - span[0]) / 4,
@@ -186,7 +202,8 @@ function score(act: number, override: Parameters<typeof predictionsFor>[1]) {
       crowdSponsorSeconds: total(crowdSponsor),
       caughtSeconds: total(intersect(predicted, crowdSponsor)),
       skipSeconds: total(predicted),
-      falseSkipSeconds: subtract(predicted, crowdAll),
+      falseSkipSeconds: subtract(skipped, crowdAll),
+      skippedSeconds: total(skipped),
       unionSeconds: total([...predicted, ...crowdSponsor]),
       intersectionSeconds: total(intersect(predicted, crowdSponsor)),
       tokens: prediction.tokens,

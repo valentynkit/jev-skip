@@ -93,3 +93,66 @@ describe("skip scheduler", () => {
     scheduler.destroy();
   });
 });
+
+describe("skip scheduler, after the review", () => {
+  it("does not re-skip a segment the viewer seeks back into", () => {
+    const skipped: Slice[] = [];
+    const scheduler = createScheduler(video, {
+      threshold: 0.85,
+      autoSkip: true,
+      onSkip: (s) => skipped.push(s),
+    });
+    scheduler.setSlices([slice({})]);
+    vi.advanceTimersByTime(60_000);
+    expect(skipped).toHaveLength(1);
+    expect(video.currentTime).toBe(102);
+
+    // What the undo button and a manual scrub back both do.
+    video.currentTime = 60;
+    video.dispatchEvent(new Event("seeked"));
+    vi.advanceTimersByTime(1000);
+    expect(video.currentTime).toBe(60);
+    expect(skipped).toHaveLength(1);
+  });
+
+  it("drops a timer that fired after playback already moved past the segment", () => {
+    const skipped: Slice[] = [];
+    const scheduler = createScheduler(video, {
+      threshold: 0.85,
+      autoSkip: true,
+      onSkip: (s) => skipped.push(s),
+    });
+    scheduler.setSlices([slice({})]);
+    // A throttled background tab: the timer is stalled while playback runs on.
+    video.currentTime = 900;
+    vi.advanceTimersByTime(60_000);
+    expect(video.currentTime).toBe(900);
+    expect(skipped).toHaveLength(0);
+  });
+});
+
+describe("skip scheduler, ads", () => {
+  it("arms nothing while an ad is playing on the same video element", () => {
+    let ad = true;
+    const skipped: Slice[] = [];
+    const scheduler = createScheduler(video, {
+      threshold: 0.85,
+      autoSkip: true,
+      adPlaying: () => ad,
+      onSkip: (s) => skipped.push(s),
+    });
+    // An ad's own playhead sits inside the first content segment's timestamps.
+    video.currentTime = 12;
+    scheduler.setSlices([slice({ start: 0, end: 30 })]);
+    expect(scheduler.pending()).toBe(null);
+    vi.advanceTimersByTime(30_000);
+    expect(skipped).toHaveLength(0);
+    expect(video.currentTime).toBe(12);
+
+    // The ad ends and the player resumes the real video from the start.
+    ad = false;
+    video.currentTime = 0;
+    video.dispatchEvent(new Event("play"));
+    expect(skipped).toHaveLength(1);
+  });
+});
