@@ -105,6 +105,36 @@ project until a TypeSafe key does. Everything measurable from here on runs again
 `fixtures/answers/` (real Jev, recorded 2026-09-18 through the shim) or the fake. Any clip
 produced this way is a replay and has to be labelled one.
 
+## The answer, and the fix (later on 2026-09-19)
+
+Driving a real Arc over CDP, logged out but with no bot wall and working playback, the
+caption fetch still returned 200 and zero bytes. So the empty body was never about
+automation. Watching the player's own network traffic shows both shapes at once:
+
+    200, 0 bytes        pot-less, the shape we were building from baseUrl
+    200, 543,122 bytes  the player's own, carrying pot, potc, c, cver, cbr, cos, cplatform
+
+YouTube answers a timedtext request without a proof-of-origin token with an empty body.
+BotGuard mints that token in the page world, which an isolated content script cannot reach.
+
+`scripts/pot-probe.mjs` proves the way around it: hook `fetch` and `XHR` in the page world,
+keep whatever caption URL the player signs for itself, and re-ask for it as json3. That
+returned 1,461 cues covering all 1,634 seconds of the test video. `entrypoints/injected.ts`
+now does exactly this, and the watch-page re-fetch is gone.
+
+**Still unverified: the whole pipeline inside the extension on a live page.** Neither
+browser on this machine can show it:
+
+- Playwright's Chromium is bot-walled, and in the last run could not even resolve the
+  googlevideo hosts, so the player never loads and never asks for captions.
+- Arc plays video fine but silently drops the extension's own `storage.local` writes. The
+  same build in plain Chromium stores settings correctly and returns a reply; in Arc the
+  `set-settings` branch never runs at all, while `get-state` in the same listener does.
+  Not chased further. It means jev-skip cannot be configured in Arc.
+
+What that leaves: the fix is right at the URL level and the code follows the proven route,
+but nobody has yet watched the bar paint from captions the extension read by itself.
+
 ## What this means for the demo
 
 The session-02 plan assumed a live request on an unlabeled video in Chrome. Three of its
