@@ -51,9 +51,55 @@ export default defineUnlistedScript(() => {
     };
   };
 
+  /**
+   * The player only signs a caption URL when it actually wants captions, which it does not
+   * do for a viewer who keeps subtitles off. Asking it for a track makes it fetch one; the
+   * previous selection goes back afterwards, so a viewer who had captions off still has
+   * them off. Without this the extension only ever worked for people watching with
+   * subtitles on.
+   */
+  function nudgeCaptions() {
+    const player = document.querySelector("#movie_player") as
+      | (Element & {
+          getOption?: (a: string, b: string) => unknown;
+          setOption?: (a: string, b: string, c: unknown) => void;
+        })
+      | null;
+    if (!player?.getOption || !player.setOption) return "no player api";
+    let tracks: any[];
+    try {
+      tracks = (player.getOption("captions", "tracklist") as any[]) ?? [];
+    } catch {
+      return "no tracklist";
+    }
+    if (!tracks.length) return "no tracks";
+    const previous = (() => {
+      try {
+        return player.getOption("captions", "track");
+      } catch {
+        return null;
+      }
+    })();
+    const hadOne = Boolean((previous as { languageCode?: string } | null)?.languageCode);
+    try {
+      player.setOption("captions", "track", tracks[0]);
+    } catch {
+      return "set failed";
+    }
+    if (!hadOne) {
+      setTimeout(() => {
+        try {
+          player.setOption!("captions", "track", {});
+        } catch {}
+      }, 2500);
+    }
+    return `nudged ${tracks.length} tracks, restoring: ${!hadOne}`;
+  }
+
   window.addEventListener("message", (event) => {
     if (event.source !== window || event.data?.source !== `${CHANNEL}-ask`) return;
     if (event.data.type === "details") post({ type: "details", details: details() });
+    if (event.data.type === "nudge") post({ type: "nudged", result: nudgeCaptions() });
   });
 
   post({ type: "ready" });

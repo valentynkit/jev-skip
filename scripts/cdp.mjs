@@ -1,15 +1,23 @@
-// Drives an already-running Chromium-based browser over CDP, so the session is a real
-// signed-in one and no automated login is ever attempted.
+// Drives an already-running Chromium-based browser over CDP. Chrome 137 dropped
+// --load-extension, so the extension is loaded by hand once through chrome://extensions
+// and this connects to the browser that has it.
 //
-//   /Applications/Arc.app/Contents/MacOS/Arc --remote-debugging-port=9222 --load-extension=dist/chrome-mv3
-//   node scripts/arc.mjs check <videoId>     captions, playback, whether the extension is loaded
+//   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+//     --remote-debugging-port=9223 --user-data-dir=/tmp/jev-chrome-manual
+//
+//   node scripts/cdp.mjs setup            point the extension at the replay server
+//   node scripts/cdp.mjs check <videoId>  captions, playback, whether the bar painted
+//   node scripts/cdp.mjs run <videoId>    the full pipeline, with the demo paint-in
 //
 // Nothing here reads credentials or touches profile files. It opens a tab and reads the
 // page, the same as sitting in front of the browser.
 import { chromium } from "playwright";
 
-const [command = "check", videoId = "4RcThoRG46c"] = process.argv.slice(2);
-const browser = await chromium.connectOverCDP("http://127.0.0.1:9222");
+const argv = process.argv.slice(2).filter((a) => !a.startsWith("--"));
+const portFlag = process.argv.indexOf("--port");
+const port = portFlag === -1 ? 9223 : process.argv[portFlag + 1];
+const [command = "check", videoId = "4RcThoRG46c"] = argv;
+const browser = await chromium.connectOverCDP(`http://127.0.0.1:${port}`);
 const context = browser.contexts()[0];
 
 const worker =
@@ -39,7 +47,7 @@ if (command === "setup") {
   );
   console.log(JSON.stringify({ extensionId: id, stored }, null, 2));
   await popup.close();
-  await browser.close();
+  
   process.exit(0);
 }
 
@@ -106,4 +114,4 @@ console.log(
     2,
   ),
 );
-await browser.close();
+

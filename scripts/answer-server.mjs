@@ -19,12 +19,18 @@ const port = Number(portIndex === -1 ? 4333 : args[portIndex + 1]);
 
 /** videoId -> { segmentId -> answer }, rebuilt from the recorded chunks. */
 const recorded = new Map();
+/** videoId -> how long the recorded call actually took, so a replay is not unrealistically fast. */
+const recordedLatency = new Map();
 for (const file of readdirSync("fixtures/answers")) {
   const payload = JSON.parse(readFileSync(join("fixtures/answers", file), "utf8"));
   if (!payload.videoId) continue;
   const bucket = recorded.get(payload.videoId) ?? {};
   Object.assign(bucket, payload.answers);
   recorded.set(payload.videoId, bucket);
+  recordedLatency.set(
+    payload.videoId,
+    Math.max(recordedLatency.get(payload.videoId) ?? 0, payload.elapsedMs ?? 0),
+  );
 }
 
 /** The text of each recorded segment, so an answer can be found when ids drift. */
@@ -105,6 +111,10 @@ createServer((req, res) => {
       `${video ? video.videoId : "unknown video"}: ${Object.keys(out).length} questions, ${hits} by id, ${byTextHits} by text, ${Object.keys(out).length - hits - byTextHits} unanswered`,
     );
 
+    // Answer no faster than the recorded call did: a 9ms reply would put a number on
+    // screen that no real request could produce.
+    const delay = recordedLatency.get(video?.videoId) ?? 700;
+    setTimeout(() => {
     res.writeHead(200, {
       "content-type": "application/json",
       // The extension calls from an extension origin, so the replay has to allow it.
@@ -120,5 +130,6 @@ createServer((req, res) => {
         },
       }),
     );
+    }, delay);
   });
 }).listen(port, "127.0.0.1", () => console.error(`answer replay on http://127.0.0.1:${port}`));

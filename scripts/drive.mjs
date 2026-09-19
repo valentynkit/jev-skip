@@ -31,6 +31,9 @@ const extension = new URL("../dist/chrome-mv3", import.meta.url).pathname;
 const profile = flag("profile", null) ?? (await mkdtemp(join(tmpdir(), "jev-skip-")));
 const context = await chromium.launchPersistentContext(profile, {
   headless: false,
+  // Real Chrome, not the bundled Chromium: it is the target browser and YouTube treats it
+  // as one. --channel chromium falls back to the bundled build.
+  channel: flag("channel", "chrome"),
   viewport: { width: 1280, height: 800 },
   recordVideo: videoDir ? { dir: videoDir, size: { width: 1280, height: 800 } } : undefined,
   args: [
@@ -38,6 +41,9 @@ const context = await chromium.launchPersistentContext(profile, {
     `--load-extension=${extension}`,
     "--autoplay-policy=no-user-gesture-required",
     "--mute-audio",
+    // Chrome 137 dropped plain --load-extension; this is the supported way to sideload
+    // an unpacked build for debugging.
+    "--enable-unsafe-extension-debugging",
   ],
 });
 

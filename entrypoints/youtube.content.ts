@@ -31,8 +31,12 @@ export default defineContentScript({
       document.querySelector(".jev-skip-toast")?.remove();
       const node = document.createElement("div");
       node.className = "jev-skip-toast";
+      // Inside the player when there is one: bottom 11% of the window put it over the page
+      // below the video, next to the Download button, which is where the first take caught it.
+      const host = document.querySelector<HTMLElement>(".html5-video-player") ?? document.body;
+      const inPlayer = host !== document.body;
       node.style.cssText =
-        "position:fixed;left:50%;bottom:11%;transform:translateX(-50%);z-index:2147483647;" +
+        `position:${inPlayer ? "absolute" : "fixed"};left:50%;bottom:${inPlayer ? "13%" : "11%"};transform:translateX(-50%);z-index:2147483647;` +
         "display:flex;gap:10px;align-items:center;padding:10px 14px;border-radius:10px;" +
         "background:#11131aee;color:#e6e9f0;font:13px/1 -apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;" +
         "font-variant-numeric:tabular-nums;box-shadow:0 8px 28px rgba(0,0,0,.45);transition:opacity .4s;";
@@ -49,7 +53,7 @@ export default defineContentScript({
         node.remove();
       });
       node.append(label, document.createTextNode("·"), undo);
-      document.body.append(node);
+      host.append(node);
       setTimeout(() => {
         node.style.opacity = "0";
         setTimeout(() => node.remove(), 400);
@@ -101,20 +105,20 @@ export default defineContentScript({
     });
 
     /**
-     * The player fetches its caption track on its own on a watch page. If it has not by the
-     * time we ask, there is nothing to read and the video gets no bar.
-     * ponytail: no nudge to turn captions on; the ceiling is a video the player never asks
-     * captions for, which looks the same as a video with none.
+     * The player signs a caption URL only when it wants captions itself. If it has not
+     * asked within a few seconds, we ask it to load a track and put the old selection back.
      */
-    function signedCaptionUrl(videoId: string, timeoutMs = 10_000): Promise<string | null> {
+    function signedCaptionUrl(videoId: string, timeoutMs = 12_000): Promise<string | null> {
       const known = captionUrls.get(videoId);
       if (known) return Promise.resolve(known);
       return new Promise((resolve) => {
+        const nudge = setTimeout(() => askPage("nudge"), 3_000);
         const timer = setTimeout(() => {
           waiting.delete(videoId);
           resolve(null);
         }, timeoutMs);
         waiting.set(videoId, (url) => {
+          clearTimeout(nudge);
           clearTimeout(timer);
           waiting.delete(videoId);
           resolve(url);

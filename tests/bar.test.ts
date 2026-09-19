@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it } from "vitest";
-import { mountBar } from "../lib/bar.ts";
+import { clampTip, mountBar, tipLeftPx } from "../lib/bar.ts";
 import { CATEGORY_COLOR, type Slice } from "../lib/types.ts";
 
 const slice = (over: Partial<Slice>): Slice => ({
@@ -145,5 +145,29 @@ describe("seek bar, painting for the camera", () => {
     expect(Math.max(...delays)).toBeLessThanOrEqual(0.4);
     expect(delays).toStrictEqual([...delays].sort((a, b) => a - b));
     bar.destroy();
+  });
+});
+
+describe("the why tooltip near the ends of the bar", () => {
+  it("keeps the tooltip on the bar at either edge", () => {
+    const bar = mountBar(progress);
+    const list = progress.querySelector(".jev-skip-bar") as HTMLElement;
+    const tip = document.querySelector(".jev-skip-tip") as HTMLElement;
+    // jsdom has no layout, so the two widths come from stubs.
+    list.getBoundingClientRect = () => ({ width: 1000 }) as DOMRect;
+    tip.getBoundingClientRect = () => ({ width: 280 }) as DOMRect;
+    // 280px of tooltip on a 1000px bar needs 14% of clearance on each side.
+    expect(clampTip(0, list, tip)).toBe("14.00%");
+    expect(clampTip(100, list, tip)).toBe("86.00%");
+    expect(clampTip(50, list, tip)).toBe("50.00%");
+    bar.destroy();
+  });
+
+  it("keeps the tooltip inside the player at either end", () => {
+    const host = { left: 0, width: 1000 } as DOMRect;
+    // A slice at the far left would centre the 280px tooltip at 10px and hang off.
+    expect(tipLeftPx({ left: 0, width: 20 } as DOMRect, host, 280)).toBe(140);
+    expect(tipLeftPx({ left: 980, width: 20 } as DOMRect, host, 280)).toBe(860);
+    expect(tipLeftPx({ left: 480, width: 40 } as DOMRect, host, 280)).toBe(500);
   });
 });

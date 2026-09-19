@@ -28,6 +28,29 @@ export interface BarHandle {
 const pct = (value: number) => `${(Math.max(0, Math.min(1, value)) * 100).toFixed(4)}%`;
 
 /**
+ * The tooltip is centred with translateX(-50%), so half its width has to fit on each side.
+ * Returns a percentage, clamped so neither edge leaves the bar.
+ */
+export function clampTip(leftPercent: number, bar: HTMLElement, tip: HTMLElement): string {
+  const barWidth = bar.getBoundingClientRect().width;
+  const tipWidth = tip.getBoundingClientRect().width || 280;
+  if (!barWidth) return `${leftPercent}%`;
+  const half = (tipWidth / 2 / barWidth) * 100;
+  return `${Math.min(100 - half, Math.max(half, leftPercent)).toFixed(2)}%`;
+}
+
+/**
+ * Centre x of a slice, in pixels inside the host, clamped so the tooltip stays on screen.
+ * The tooltip hangs off the player rather than the progress bar: inside the bar it sits in
+ * a stacking context YouTube's own seek preview beats, so it ends up behind the thumbnail.
+ */
+export function tipLeftPx(slice: DOMRect, host: DOMRect, tipWidth: number): number {
+  const centre = slice.left + slice.width / 2 - host.left;
+  const half = tipWidth / 2;
+  return Math.round(Math.min(host.width - half, Math.max(half, centre)));
+}
+
+/**
  * Slices are absolutely positioned <li> in a container over .ytp-progress-bar, the
  * mechanics SponsorBlock uses (src/js-components/previewBar.ts:409-443). The semantics are
  * ours: one hue per category, opacity from probability, so a borderline sponsor is a ghost.
@@ -49,13 +72,15 @@ export function mountBar(progressBar: HTMLElement, options: BarOptions = {}): Ba
   list.style.cssText =
     `position:absolute;inset:0;margin:0;padding:0;list-style:none;pointer-events:none;z-index:${BAR_Z};`;
 
+  // The player, so the tooltip can sit above YouTube's seek preview instead of behind it.
+  const host = progressBar.closest<HTMLElement>(".html5-video-player") ?? progressBar;
   const tip = doc.createElement("div");
   tip.className = "jev-skip-tip";
   tip.style.cssText =
-    "position:absolute;bottom:14px;display:none;max-width:280px;padding:6px 8px;border-radius:6px;" +
-    "background:#11131a;color:#e6e9f0;font:12px/1.4 -apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;" +
-    "box-shadow:0 4px 16px rgba(0,0,0,.5);pointer-events:none;z-index:2;transform:translateX(-50%);white-space:normal;";
-  list.append(tip);
+    "position:absolute;bottom:64px;display:none;width:280px;padding:7px 9px;border-radius:7px;" +
+    "background:#11131af2;color:#e6e9f0;font:12px/1.4 -apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;" +
+    "box-shadow:0 6px 22px rgba(0,0,0,.6);pointer-events:none;z-index:2147483646;transform:translateX(-50%);white-space:normal;";
+  host.append(tip);
   progressBar.append(list);
 
   return {
@@ -101,8 +126,10 @@ export function mountBar(progressBar: HTMLElement, options: BarOptions = {}): Ba
         // argument for trusting a probability nobody voted on.
         li.onmouseenter = () => {
           tip.textContent = `${slice.category} ${Math.round(slice.p * 100)}% at ${formatTime(slice.start)} · ${slice.text.slice(0, 80)}`;
-          tip.style.left = li.style.left;
           tip.style.display = "block";
+          // Centred on the slice, but never hanging off the edge: there it wrapped into an
+          // unreadable column, which is what the first demo take caught.
+          tip.style.left = `${tipLeftPx(li.getBoundingClientRect(), host.getBoundingClientRect(), tip.getBoundingClientRect().width || 280)}px`;
         };
         li.onmouseleave = () => {
           tip.style.display = "none";
@@ -119,6 +146,7 @@ export function mountBar(progressBar: HTMLElement, options: BarOptions = {}): Ba
     },
     destroy() {
       nodes.clear();
+      tip.remove();
       list.remove();
     },
   };
